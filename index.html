@@ -105,8 +105,8 @@
 
   .category-body {
     overflow: hidden;
-    max-height: 600px;
-    transition: max-height 0.25s ease;
+    max-height: 2000px;
+    transition: max-height 0.3s ease;
   }
 
   .category-block.collapsed .category-body {
@@ -952,7 +952,7 @@ function initCategories() {
     }).join('');
 
     return `<div class="category-block">
-      <div class="category-header" onclick="toggleCategory(this.closest('.category-block'))">
+      <div class="category-header" onclick="toggleCategory(this.closest('.category-block'))" aria-expanded="true">
         <div class="category-label">${escHtml(cat.label)}</div>
         <span class="category-chevron">▼</span>
       </div>
@@ -965,6 +965,8 @@ function initCategories() {
 
 function toggleCategory(block) {
   block.classList.toggle('collapsed');
+  const header = block.querySelector('.category-header');
+  header.setAttribute('aria-expanded', !block.classList.contains('collapsed'));
 }
 
 document.getElementById('modalMontant').addEventListener('keydown', e => {
