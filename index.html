@@ -718,8 +718,7 @@ function openModal(idx) {
   if (item.avsPrix !== undefined) {
     // Build AVS / Standard selector
     grid.style.display = '';
-    const avsName = item.avsOnly ? item.name + ' (AVS)' : item.name + ' (AVS)';
-    const stdName = item.name;
+    const avsName = item.name + ' (AVS)';
     grid.innerHTML = `
       <button class="avs-pick-btn" id="avsBtn"
               onclick="selectAvsPrice(${item.avsPrix}, '${escJs(avsName)}')">
@@ -728,7 +727,7 @@ function openModal(idx) {
       </button>` +
       (!item.avsOnly ? `
       <button class="avs-pick-btn" id="stdBtn"
-              onclick="selectAvsPrice(${item.normalPrix}, '${escJs(stdName)}')">
+              onclick="selectAvsPrice(${item.normalPrix}, '${escJs(item.name)}')">
         <div class="avs-pick-label">Standard</div>
         <div class="avs-pick-price">CHF ${item.normalPrix.toFixed(2)}</div>
       </button>` : '');
