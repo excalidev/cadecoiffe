@@ -71,13 +71,46 @@
   .category-block { margin-bottom: 1.25rem; }
   .category-block:last-child { margin-bottom: 0; }
 
+  .category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    padding: 0.2rem 0;
+    margin-bottom: 0.5rem;
+  }
+
   .category-label {
     font-size: 0.72rem;
     font-weight: 500;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .category-chevron {
+    font-size: 0.65rem;
+    color: var(--muted);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+    margin-left: 0.4rem;
+  }
+
+  .category-block.collapsed .category-chevron {
+    transform: rotate(-90deg);
+  }
+
+  .category-body {
+    overflow: hidden;
+    max-height: 600px;
+    transition: max-height 0.25s ease;
+  }
+
+  .category-block.collapsed .category-body {
+    max-height: 0;
   }
 
   .quick-grid {
@@ -919,10 +952,19 @@ function initCategories() {
     }).join('');
 
     return `<div class="category-block">
-      <div class="category-label">${escHtml(cat.label)}</div>
-      <div class="quick-grid">${buttons}</div>
+      <div class="category-header" onclick="toggleCategory(this.closest('.category-block'))">
+        <div class="category-label">${escHtml(cat.label)}</div>
+        <span class="category-chevron">▼</span>
+      </div>
+      <div class="category-body">
+        <div class="quick-grid">${buttons}</div>
+      </div>
     </div>`;
   }).join('');
+}
+
+function toggleCategory(block) {
+  block.classList.toggle('collapsed');
 }
 
 document.getElementById('modalMontant').addEventListener('keydown', e => {
