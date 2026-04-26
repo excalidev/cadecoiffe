@@ -3,26 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Prestations — Salon</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<title>Ça décoiffe — Prestations</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #FAF8F5;
+    --bg: #FFFDE7;
     --surface: #FFFFFF;
     --border: #E8E3DB;
     --text: #1C1A17;
     --muted: #7A756C;
-    --accent: #B07D5A;
-    --accent-light: #F5EDE4;
-    --accent-dark: #7D5638;
+    --accent: #C62828;
+    --accent-light: #FFEBEE;
+    --accent-dark: #8B1A1A;
     --danger: #C94040;
     --danger-light: #FCEAEA;
     --success: #3A7D52;
     --success-light: #EAF4EE;
     --radius: 14px;
     --radius-sm: 8px;
+    --brand-yellow: #FFE600;
   }
 
   body {
@@ -34,24 +35,24 @@
   }
 
   header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 1.25rem 1.5rem 1rem;
+    background: var(--brand-yellow);
+    border-bottom: 3px solid var(--accent);
+    padding: 1rem 1.5rem;
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
   }
 
   .header-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.5rem;
-    color: var(--text);
-    letter-spacing: -0.01em;
+    font-family: 'Boogaloo', cursive;
+    font-size: 2rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
   }
 
   .header-date {
     font-size: 0.85rem;
-    color: var(--muted);
+    color: var(--text);
   }
 
   .container { max-width: 680px; margin: 0 auto; padding: 1.5rem 1rem; }
@@ -78,25 +79,33 @@
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    padding: 0.2rem 0;
+    padding: 0.875rem 1rem;
     margin-bottom: 0.5rem;
+    background: #FFF9C4;
+    border-radius: var(--radius-sm);
+    border: 1px solid #F0E060;
+    transition: background 0.15s;
+  }
+
+  .category-header:active {
+    background: var(--brand-yellow);
   }
 
   .category-label {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    color: var(--muted);
+    color: var(--text);
     text-transform: uppercase;
     letter-spacing: 0.07em;
     margin-bottom: 0;
   }
 
   .category-chevron {
-    font-size: 0.65rem;
-    color: var(--muted);
+    font-size: 1rem;
+    color: var(--accent);
     transition: transform 0.2s ease;
     flex-shrink: 0;
-    margin-left: 0.4rem;
+    margin-left: 0.75rem;
   }
 
   .category-block.collapsed .category-chevron {
@@ -524,7 +533,7 @@
 <body>
 
 <header>
-  <span class="header-title">Salon</span>
+  <span class="header-title">Ça décoiffe</span>
   <span class="header-date" id="headerDate"></span>
 </header>
 
@@ -951,8 +960,8 @@ function initCategories() {
       </button>`;
     }).join('');
 
-    return `<div class="category-block">
-      <div class="category-header" onclick="toggleCategory(this.closest('.category-block'))" aria-expanded="true">
+    return `<div class="category-block collapsed">
+      <div class="category-header" onclick="toggleCategory(this.closest('.category-block'))" aria-expanded="false">
         <div class="category-label">${escHtml(cat.label)}</div>
         <span class="category-chevron">▼</span>
       </div>
