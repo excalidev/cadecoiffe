@@ -67,9 +67,22 @@
     margin-bottom: 0.75rem;
   }
 
+  /* Category blocks inside the prestations section */
+  .category-block { margin-bottom: 1.25rem; }
+  .category-block:last-child { margin-bottom: 0; }
+
+  .category-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.5rem;
+  }
+
   .quick-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
   }
 
@@ -77,7 +90,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 0.75rem 0.5rem;
+    padding: 0.7rem 0.5rem;
     cursor: pointer;
     text-align: center;
     transition: background 0.15s, border-color 0.15s, transform 0.1s;
@@ -89,10 +102,11 @@
 
   .quick-btn-name {
     display: block;
-    font-size: 0.875rem;
+    font-size: 0.825rem;
     font-weight: 500;
     color: var(--text);
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.3rem;
+    line-height: 1.3;
   }
 
   .quick-btn-price {
@@ -101,6 +115,165 @@
     color: var(--accent);
     font-weight: 500;
   }
+
+  /* Chips shown on buttons (AVS / Standard / Prix libre) */
+  .btn-chips {
+    display: flex;
+    gap: 3px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+
+  .chip {
+    font-size: 0.68rem;
+    padding: 2px 6px;
+    border-radius: 50px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .chip-avs   { background: var(--accent-light); color: var(--accent-dark); }
+  .chip-std   { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+  .chip-libre { background: #EEF2FF; color: #3730A3; }
+
+  /* Modal — bottom sheet */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal-card {
+    background: var(--surface);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 1.5rem 1.25rem 2rem;
+    width: 100%;
+    max-width: 680px;
+    transform: translateY(24px);
+    transition: transform 0.22s ease;
+  }
+
+  .modal-overlay.open .modal-card { transform: translateY(0); }
+
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    margin: 0 auto 1.25rem;
+  }
+
+  .modal-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .modal-subtitle {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  /* AVS / Standard selector buttons inside modal */
+  .modal-avs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .avs-pick-btn {
+    padding: 0.75rem 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .avs-pick-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .avs-pick-label { font-size: 0.72rem; color: var(--muted); margin-bottom: 2px; }
+  .avs-pick-price { font-size: 1rem; font-weight: 500; color: var(--text); }
+
+  .modal-field-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 0.375rem;
+  }
+
+  .modal-montant-input {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.9rem;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .modal-montant-input:focus { border-color: var(--accent); }
+  .modal-montant-input.error { border-color: var(--danger); }
+
+  .modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 0.5rem;
+  }
+
+  .modal-cancel {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--muted);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .modal-confirm {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+  }
+
+  .modal-confirm:active { background: var(--accent-dark); }
 
   .manual-card {
     background: var(--surface);
@@ -325,8 +498,8 @@
 <div class="container">
 
   <section>
-    <div class="section-label">Prestations rapides</div>
-    <div class="quick-grid" id="quickGrid"></div>
+    <div class="section-label">Prestations</div>
+    <div id="prestationsSection"></div>
   </section>
 
   <section>
@@ -365,20 +538,121 @@
 
 </div>
 
+<!-- Price selection / adjustment modal (bottom sheet) -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-name" id="modalName"></div>
+    <div class="modal-subtitle" id="modalSubtitle"></div>
+    <div class="modal-avs-grid" id="modalAvsGrid" style="display:none"></div>
+    <div class="modal-field-label">Montant (CHF)</div>
+    <input type="number" class="modal-montant-input" id="modalMontant"
+           placeholder="0.00" min="0" step="0.05" inputmode="decimal">
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Annuler</button>
+      <button class="modal-confirm" onclick="confirmModal()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-const QUICK_PRESTATIONS = [
-  { name: 'Coupe femme',  price: 65 },
-  { name: 'Coupe homme',  price: 35 },
-  { name: 'Brushing',     price: 45 },
-  { name: 'Couleur',      price: 120 },
-  { name: 'Mèches',       price: 150 },
-  { name: 'Soin',         price: 30 },
+// ---------------------------------------------------------------------------
+// Prestations catalogue — compte 3022
+// Types :
+//   price           → montant fixe (ajustable dans le modal)
+//   avsPrix/normalPrix → deux variantes (AVS moins cher / standard)
+//   variable: true  → prix libre, aucune valeur par défaut
+// ---------------------------------------------------------------------------
+const CATEGORIES = [
+  {
+    label: 'Enfants & Jeunes',
+    items: [
+      { code: '004', name: 'Coupe tout petit',                             price: 10 },
+      { code: '001', name: 'Coupe enfant',      subtitle: "jusqu'à 16 ans", price: 20 },
+      { code: '002', name: 'Coupe jeune étudiant·e',                       price: 23 },
+      { code: '003', name: 'Coupe jeune fille + shampooing + lissage',     price: 35 },
+    ]
+  },
+  {
+    label: 'Hommes',
+    items: [
+      { code: '010', name: 'Coupe homme',             subtitle: 'dès 20 ans', price: 25 },
+      { code: '011', name: 'Coupe homme + shampooing',                        price: 32 },
+      { code: '012', name: 'Coupe couronne',                                  price: 20 },
+      { code: '013', name: 'Coupe tondeuse',                                  price: 23 },
+      { code: '014', name: 'Coupe + couleur homme',                           price: 46 },
+    ]
+  },
+  {
+    label: 'Dames — Brushing & Coupe',
+    items: [
+      { code: '020/021', name: 'Brushing + shampooing',              avsPrix: 35, normalPrix: 36 },
+      { code: '022',     name: 'Mise en plis + shampooing',          avsPrix: 34, avsOnly: true  },
+      { code: '023/024', name: 'Coupe + brushing / mise en plis',   avsPrix: 51, normalPrix: 53 },
+      { code: '025',     name: 'Coupe séchage aux doigts',           price: 50                   },
+    ]
+  },
+  {
+    label: 'Dames — Couleur',
+    items: [
+      { code: '026',     name: 'Couleur + brushing / mise en plis',        price: 58 },
+      { code: '027',     name: 'Couleur + brushing cheveux longs',         price: 67 },
+      { code: '028/029', name: 'Couleur + coupe + brushing', avsPrix: 84, normalPrix: 86 },
+      { code: '030',     name: 'Couleur + coupe + séchage rapide',         price: 80 },
+    ]
+  },
+  {
+    label: 'Dames — Mèches',
+    items: [
+      { code: '031', name: 'Mèches bonnet + brushing',          price: 85  },
+      { code: '032', name: 'Mèches bonnet + coupe + brushing',  price: 110 },
+      { code: '033', name: 'Mèches papiers petit',     subtitle: '2.50 / pièce', variable: true },
+      { code: '034', name: 'Mèches papiers grand',     subtitle: '3.00 / pièce', variable: true },
+      { code: '035', name: 'Mèches papiers multicouleurs', subtitle: '3.50 / pièce', variable: true },
+    ]
+  },
+  {
+    label: 'Dames — Permanente',
+    items: [
+      { code: '038/039', name: 'Permanente + brushing',            avsPrix: 80,  normalPrix: 85  },
+      { code: '036/037', name: 'Permanente + coupe + brushing',    avsPrix: 100, normalPrix: 105 },
+      { code: '040',     name: 'Permanente cheveux longs + coupe', price: 140 },
+      { code: '041',     name: 'Permanente spirale',               price: 140 },
+    ]
+  },
+  {
+    label: 'Dames — Combinaisons prix libre',
+    items: [
+      { code: '042', name: 'Couleur + coupe + mèches', variable: true },
+      { code: '043', name: 'Mèches + coupe',           variable: true },
+      { code: '044', name: 'Couleur + mèches',         variable: true },
+    ]
+  },
+  {
+    label: 'Spécial & Événements',
+    items: [
+      { code: '050', name: 'Massage huiles essentielles', price: 17  },
+      { code: '051', name: 'Chignon de soirée',           price: 65  },
+      { code: '052', name: 'Chignon de mariage',          price: 75  },
+      { code: '053', name: 'Forfait mariage',             price: 140 },
+    ]
+  },
+  {
+    label: 'Divers',
+    items: [
+      { code: '100', name: 'Ventes prix variable', variable: true },
+    ]
+  },
 ];
 
-const COMPTE_DEBIT  = '1000';
-const COMPTE_CREDIT = '3200';
+// Flat index for modal lookups
+const FLAT_ITEMS = [];
+CATEGORIES.forEach(cat => cat.items.forEach(item => FLAT_ITEMS.push(item)));
+
+const COMPTE_DEBIT  = '1010';
+const COMPTE_CREDIT = '3022';
 const JOURNAL       = 'VE';
 const STORAGE_KEY   = 'salon_prestations';
 
@@ -420,6 +694,83 @@ function addManual() {
   addPrestation(libelle, montant);
   document.getElementById('inputLibelle').value = '';
   document.getElementById('inputMontant').value = '';
+}
+
+// ---------------------------------------------------------------------------
+// Modal — price selection / adjustment
+// ---------------------------------------------------------------------------
+let _modalName = '';
+
+function openModal(idx) {
+  const item = FLAT_ITEMS[idx];
+  _modalName = item.name;
+
+  document.getElementById('modalName').textContent = item.name;
+
+  const sub = document.getElementById('modalSubtitle');
+  sub.textContent = item.subtitle || '';
+  sub.style.display = item.subtitle ? '' : 'none';
+
+  const grid = document.getElementById('modalAvsGrid');
+  const input = document.getElementById('modalMontant');
+  input.classList.remove('error');
+
+  if (item.avsPrix !== undefined) {
+    // Build AVS / Standard selector
+    grid.style.display = '';
+    const avsName = item.name + ' (AVS)';
+    grid.innerHTML = `
+      <button class="avs-pick-btn" id="avsBtn"
+              onclick="selectAvsPrice(${item.avsPrix}, '${escJs(avsName)}')">
+        <div class="avs-pick-label">AVS</div>
+        <div class="avs-pick-price">CHF ${item.avsPrix.toFixed(2)}</div>
+      </button>` +
+      (!item.avsOnly ? `
+      <button class="avs-pick-btn" id="stdBtn"
+              onclick="selectAvsPrice(${item.normalPrix}, '${escJs(item.name)}')">
+        <div class="avs-pick-label">Standard</div>
+        <div class="avs-pick-price">CHF ${item.normalPrix.toFixed(2)}</div>
+      </button>` : '');
+    // Pre-select AVS
+    selectAvsPrice(item.avsPrix, avsName);
+  } else {
+    grid.style.display = 'none';
+    grid.innerHTML = '';
+    input.value = item.variable ? '' : item.price.toFixed(2);
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => input.focus(), 220);
+}
+
+function selectAvsPrice(price, name) {
+  _modalName = name;
+  document.getElementById('modalMontant').value = price.toFixed(2);
+  document.querySelectorAll('.avs-pick-btn').forEach(btn => btn.classList.remove('selected'));
+  // Mark the button that matches
+  document.querySelectorAll('.avs-pick-btn').forEach(btn => {
+    const priceEl = btn.querySelector('.avs-pick-price');
+    if (priceEl && parseFloat(priceEl.textContent.replace('CHF ', '')) === price) {
+      btn.classList.add('selected');
+    }
+  });
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  _modalName = '';
+}
+
+function confirmModal() {
+  const input = document.getElementById('modalMontant');
+  const montant = parseFloat(input.value);
+  if (isNaN(montant) || montant <= 0) {
+    input.classList.add('error');
+    setTimeout(() => input.classList.remove('error'), 1500);
+    return;
+  }
+  addPrestation(_modalName, montant);
+  closeModal();
 }
 
 function render() {
@@ -522,6 +873,10 @@ function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function escJs(str) {
+  return str.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+
 let toastTimer;
 function toast(msg) {
   const el = document.getElementById('toast');
@@ -539,15 +894,41 @@ function initHeader() {
     days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
 }
 
-function initQuickGrid() {
-  const grid = document.getElementById('quickGrid');
-  grid.innerHTML = QUICK_PRESTATIONS.map(p => `
-    <button class="quick-btn" onclick="addPrestation('${escHtml(p.name)}', ${p.price})">
-      <span class="quick-btn-name">${escHtml(p.name)}</span>
-      <span class="quick-btn-price">CHF ${p.price.toFixed(2)}</span>
-    </button>
-  `).join('');
+function initCategories() {
+  const section = document.getElementById('prestationsSection');
+  section.innerHTML = CATEGORIES.map(cat => {
+    const buttons = cat.items.map((item, localIdx) => {
+      const globalIdx = FLAT_ITEMS.indexOf(item);
+      let priceHtml;
+      if (item.avsPrix !== undefined) {
+        priceHtml = `<div class="btn-chips">
+          <span class="chip chip-avs">AVS CHF ${item.avsPrix.toFixed(2)}</span>` +
+          (!item.avsOnly
+            ? `<span class="chip chip-std">CHF ${item.normalPrix.toFixed(2)}</span>`
+            : '') +
+          `</div>`;
+      } else if (item.variable) {
+        priceHtml = `<div class="btn-chips"><span class="chip chip-libre">Prix libre</span></div>`;
+      } else {
+        priceHtml = `<span class="quick-btn-price">CHF ${item.price.toFixed(2)}</span>`;
+      }
+      return `<button class="quick-btn" onclick="openModal(${globalIdx})">
+        <span class="quick-btn-name">${escHtml(item.name)}</span>
+        ${priceHtml}
+      </button>`;
+    }).join('');
+
+    return `<div class="category-block">
+      <div class="category-label">${escHtml(cat.label)}</div>
+      <div class="quick-grid">${buttons}</div>
+    </div>`;
+  }).join('');
 }
+
+document.getElementById('modalMontant').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmModal();
+  if (e.key === 'Escape') closeModal();
+});
 
 document.getElementById('inputMontant').addEventListener('keydown', e => {
   if (e.key === 'Enter') addManual();
@@ -558,7 +939,7 @@ document.getElementById('inputLibelle').addEventListener('keydown', e => {
 
 loadFromStorage();
 initHeader();
-initQuickGrid();
+initCategories();
 render();
 </script>
 </body>
