@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Prestations — Salon</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAF8F5;
+    --surface: #FFFFFF;
+    --border: #E8E3DB;
+    --text: #1C1A17;
+    --muted: #7A756C;
+    --accent: #B07D5A;
+    --accent-light: #F5EDE4;
+    --accent-dark: #7D5638;
+    --danger: #C94040;
+    --danger-light: #FCEAEA;
+    --success: #3A7D52;
+    --success-light: #EAF4EE;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 2rem;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 1.5rem 1rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .header-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .header-date {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  section { margin-bottom: 1.5rem; }
+
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+  }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .quick-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 0.5rem;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .quick-btn:active { transform: scale(0.97); background: var(--accent-light); border-color: var(--accent); }
+
+  .quick-btn-name {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+
+  .quick-btn-price {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .manual-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.125rem;
+    display: flex;
+    gap: 0.625rem;
+    align-items: flex-end;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 0.375rem; }
+  .field-label { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+
+  input[type="text"], input[type="number"] {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.75rem;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+
+  input[type="text"]:focus, input[type="number"]:focus {
+    border-color: var(--accent);
+  }
+
+  .field-libelle { flex: 1; }
+  .field-libelle input { width: 100%; }
+  .field-montant input { width: 90px; }
+
+  .add-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+    align-self: flex-end;
+    height: 40px;
+  }
+
+  .add-btn:active { transform: scale(0.97); background: var(--accent-dark); }
+
+  .list-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .list-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .prestation-item {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid var(--border);
+    gap: 0.75rem;
+    animation: slide-in 0.18s ease-out;
+  }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .prestation-item:last-child { border-bottom: none; }
+
+  .prestation-time {
+    font-size: 0.75rem;
+    color: var(--muted);
+    min-width: 40px;
+  }
+
+  .prestation-name {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .prestation-amount {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text);
+    min-width: 56px;
+    text-align: right;
+  }
+
+  .del-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 1.1rem;
+    padding: 0.25rem;
+    line-height: 1;
+    border-radius: 50%;
+    transition: color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .del-btn:active { color: var(--danger); background: var(--danger-light); }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem 1rem;
+    background: var(--accent-light);
+    border-top: 1px solid var(--border);
+  }
+
+  .total-label { font-size: 0.85rem; font-weight: 500; color: var(--accent-dark); }
+
+  .total-amount {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    color: var(--accent-dark);
+  }
+
+  .export-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .export-btn {
+    background: var(--success);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .export-btn:active { transform: scale(0.98); background: #2d6140; }
+  .export-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+  .clear-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--muted);
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .clear-btn:active { color: var(--danger); border-color: var(--danger); }
+
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1C1A17;
+    color: #fff;
+    padding: 0.6rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: transform 0.25s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .count-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 500;
+    border-radius: 50px;
+    padding: 0.1rem 0.45rem;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="header-title">Salon</span>
+  <span class="header-date" id="headerDate"></span>
+</header>
+
+<div class="container">
+
+  <section>
+    <div class="section-label">Prestations rapides</div>
+    <div class="quick-grid" id="quickGrid"></div>
+  </section>
+
+  <section>
+    <div class="section-label">Saisie manuelle</div>
+    <div class="manual-card">
+      <div class="field field-libelle">
+        <span class="field-label">Prestation</span>
+        <input type="text" id="inputLibelle" placeholder="ex: balayage" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="field field-montant">
+        <span class="field-label">Montant (CHF)</span>
+        <input type="number" id="inputMontant" placeholder="0.00" min="0" step="0.05" inputmode="decimal">
+      </div>
+      <button class="add-btn" onclick="addManual()">+ Ajouter</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Journée en cours <span class="count-badge" id="countBadge">0</span></div>
+    <div class="list-card">
+      <div id="prestationList"></div>
+      <div class="total-row" id="totalRow" style="display:none">
+        <span class="total-label">Total du jour</span>
+        <span class="total-amount" id="totalAmount">CHF 0.00</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="export-section">
+    <div class="section-label">Export Winbiz</div>
+    <button class="export-btn" id="exportBtn" onclick="exportCSV()" disabled>
+      Générer le fichier d'import Winbiz
+    </button>
+    <button class="clear-btn" onclick="clearDay()">Vider la journée</button>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const QUICK_PRESTATIONS = [
+  { name: 'Coupe femme',  price: 65 },
+  { name: 'Coupe homme',  price: 35 },
+  { name: 'Brushing',     price: 45 },
+  { name: 'Couleur',      price: 120 },
+  { name: 'Mèches',       price: 150 },
+  { name: 'Soin',         price: 30 },
+];
+
+const COMPTE_DEBIT  = '1000';
+const COMPTE_CREDIT = '3200';
+const JOURNAL       = 'VE';
+const STORAGE_KEY   = 'salon_prestations';
+
+let prestations = [];
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    prestations = raw ? JSON.parse(raw) : [];
+  } catch { prestations = []; }
+}
+
+function saveToStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(prestations));
+}
+
+function addPrestation(libelle, montant) {
+  const now = new Date();
+  const hhmm = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  prestations.push({ id: Date.now(), libelle, montant: parseFloat(montant), time: hhmm });
+  saveToStorage();
+  render();
+  toast(`${libelle} — CHF ${parseFloat(montant).toFixed(2)}`);
+}
+
+function removePrestation(id) {
+  prestations = prestations.filter(p => p.id !== id);
+  saveToStorage();
+  render();
+}
+
+function addManual() {
+  const libelle = document.getElementById('inputLibelle').value.trim();
+  const montant = parseFloat(document.getElementById('inputMontant').value);
+  if (!libelle || isNaN(montant) || montant <= 0) {
+    toast('Libellé et montant requis');
+    return;
+  }
+  addPrestation(libelle, montant);
+  document.getElementById('inputLibelle').value = '';
+  document.getElementById('inputMontant').value = '';
+}
+
+function render() {
+  const list = document.getElementById('prestationList');
+  const totalRow = document.getElementById('totalRow');
+  const badge = document.getElementById('countBadge');
+  const exportBtn = document.getElementById('exportBtn');
+
+  badge.textContent = prestations.length;
+  exportBtn.disabled = prestations.length === 0;
+
+  if (prestations.length === 0) {
+    list.innerHTML = '<div class="list-empty">Aucune prestation saisie</div>';
+    totalRow.style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = prestations.map(p => `
+    <div class="prestation-item">
+      <span class="prestation-time">${p.time}</span>
+      <span class="prestation-name">${escHtml(p.libelle)}</span>
+      <span class="prestation-amount">CHF ${p.montant.toFixed(2)}</span>
+      <button class="del-btn" onclick="removePrestation(${p.id})" aria-label="Supprimer">✕</button>
+    </div>
+  `).join('');
+
+  const total = prestations.reduce((s, p) => s + p.montant, 0);
+  document.getElementById('totalAmount').textContent = 'CHF ' + total.toFixed(2);
+  totalRow.style.display = 'flex';
+}
+
+function buildCSV() {
+  const today = formatDate(new Date());
+  const lines = ['Date;N° Pièce;Cpte Débit;Cpte Crédit;Libellé;Montant;Journal'];
+  prestations.forEach((p, i) => {
+    const row = [
+      today,
+      (i + 1).toString(),
+      COMPTE_DEBIT,
+      COMPTE_CREDIT,
+      p.libelle.replace(/;/g, ','),
+      p.montant.toFixed(2),
+      JOURNAL
+    ];
+    lines.push(row.join(';'));
+  });
+  return lines.join('\r\n');
+}
+
+async function exportCSV() {
+  if (prestations.length === 0) return;
+  const filename = 'winbiz_' + formatDateFile(new Date()) + '.csv';
+  const csv = buildCSV();
+  const blob = new Blob([csv], { type: 'text/csv;charset=windows-1252' });
+
+  if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename)] })) {
+    try {
+      await navigator.share({
+        title: 'Import Winbiz — ' + formatDate(new Date()),
+        text: 'Fichier d\'import des écritures Winbiz',
+        files: [new File([blob], filename, { type: 'text/csv' })]
+      });
+      toast('Fichier partagé');
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+    }
+  }
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Fichier téléchargé — prêt à importer dans Winbiz');
+}
+
+function clearDay() {
+  if (prestations.length === 0) return;
+  if (!confirm('Vider toutes les prestations de la journée ?')) return;
+  prestations = [];
+  saveToStorage();
+  render();
+}
+
+function formatDate(d) {
+  return d.getDate().toString().padStart(2,'0') + '.' +
+         (d.getMonth()+1).toString().padStart(2,'0') + '.' +
+         d.getFullYear();
+}
+
+function formatDateFile(d) {
+  return d.getFullYear() + '-' +
+         (d.getMonth()+1).toString().padStart(2,'0') + '-' +
+         d.getDate().toString().padStart(2,'0');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function initHeader() {
+  const d = new Date();
+  const days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  document.getElementById('headerDate').textContent =
+    days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
+}
+
+function initQuickGrid() {
+  const grid = document.getElementById('quickGrid');
+  grid.innerHTML = QUICK_PRESTATIONS.map(p => `
+    <button class="quick-btn" onclick="addPrestation('${escHtml(p.name)}', ${p.price})">
+      <span class="quick-btn-name">${escHtml(p.name)}</span>
+      <span class="quick-btn-price">CHF ${p.price.toFixed(2)}</span>
+    </button>
+  `).join('');
+}
+
+document.getElementById('inputMontant').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addManual();
+});
+document.getElementById('inputLibelle').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('inputMontant').focus();
+});
+
+loadFromStorage();
+initHeader();
+initQuickGrid();
+render();
+</script>
+</body>
+</html>
