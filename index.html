@@ -528,13 +528,39 @@
     margin-left: 0.4rem;
     vertical-align: middle;
   }
+
+  /* JSONBin sync indicator & settings */
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.3s;
+    cursor: default;
+  }
+  .sync-dot.syncing { background: #F59E0B; }
+  .sync-dot.ok      { background: var(--success); }
+  .sync-dot.error   { background: var(--danger); }
+
+
 </style>
 </head>
 <body>
 
 <header>
   <span class="header-title">Ça décoiffe</span>
-  <span class="header-date" id="headerDate"></span>
+  <div class="header-right">
+    <div class="sync-dot" id="syncDot" role="status" aria-live="polite"
+         aria-label="Synchronisation…" title="Synchronisation…"></div>
+    <span class="header-date" id="headerDate"></span>
+  </div>
 </header>
 
 <div class="container">
@@ -599,7 +625,81 @@
 
 <div class="toast" id="toast"></div>
 
+
+
+
 <script>
+// ---------------------------------------------------------------------------
+// JSONBin synchronisation
+// ---------------------------------------------------------------------------
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b';
+const JSONBIN_KEY  = '$2a$10$VVLHiBwFDToXvzYTz42/GusDphp8oicWX71OZnq3EJZfIC//dyjpO';
+const JSONBIN_BIN  = '69f0a929856a6821898119cf';
+
+let syncTimer = null;
+
+function setSyncDot(state) { // 'idle' | 'syncing' | 'ok' | 'error'
+  const dot = document.getElementById('syncDot');
+  dot.className = 'sync-dot' + (state !== 'idle' ? ' ' + state : '');
+  const label = state === 'idle'    ? 'JSONBin non configuré'
+              : state === 'syncing' ? 'Synchronisation en cours…'
+              : state === 'ok'      ? 'Synchronisé avec JSONBin'
+                                    : 'Erreur de synchronisation';
+  dot.title = label;
+  dot.setAttribute('aria-label', label);
+}
+
+async function loadFromJSONBin() {
+  setSyncDot('syncing');
+  try {
+    const res = await fetch(`${JSONBIN_BASE}/${JSONBIN_BIN}/latest`, {
+      headers: { 'X-Access-Key': JSONBIN_KEY }
+    });
+    if (!res.ok) { setSyncDot('error'); return null; }
+    const json = await res.json();
+    setSyncDot('ok');
+    const r = json.record;
+    if (Array.isArray(r)) return r;
+    if (r && Array.isArray(r.prestations)) return r.prestations;
+    return null;
+  } catch {
+    setSyncDot('error');
+    return null;
+  }
+}
+
+async function saveToJSONBin() {
+  setSyncDot('syncing');
+  try {
+    const res = await fetch(`${JSONBIN_BASE}/${JSONBIN_BIN}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Access-Key': JSONBIN_KEY
+      },
+      body: JSON.stringify({ prestations })
+    });
+    setSyncDot(res.ok ? 'ok' : 'error');
+  } catch {
+    setSyncDot('error');
+  }
+}
+
+function scheduleSyncToJSONBin() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(saveToJSONBin, 1500);
+}
+
+async function syncFromJSONBin() {
+  const snapshot = JSON.stringify(prestations);
+  const remote = await loadFromJSONBin();
+  if (remote !== null && JSON.stringify(prestations) === snapshot) {
+    prestations = remote;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prestations));
+    render();
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Prestations catalogue — compte 3022
 // Types :
@@ -709,6 +809,7 @@ function loadFromStorage() {
 
 function saveToStorage() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(prestations));
+  scheduleSyncToJSONBin();
 }
 
 function addPrestation(libelle, montant) {
@@ -994,6 +1095,7 @@ loadFromStorage();
 initHeader();
 initCategories();
 render();
+syncFromJSONBin();
 </script>
 </body>
 </html>
