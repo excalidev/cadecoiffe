@@ -448,6 +448,17 @@
 
   .del-btn:active { color: var(--danger); background: var(--danger-light); }
 
+  .exported-badge {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--success);
+    background: var(--success-light);
+    border-radius: 50px;
+    padding: 0.1rem 0.45rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   .total-row {
     display: flex;
     justify-content: space-between;
@@ -955,10 +966,12 @@ function render() {
 
   list.innerHTML = prestations.map(p => {
     const dateSpan = p.date ? '<span class="prestation-date">' + escHtml(p.date) + '</span>' : '';
+    const exportedBadge = p.exported ? '<span class="exported-badge">✓ exporté</span>' : '';
     return `
     <div class="prestation-item">
       <span class="prestation-time">${dateSpan}${escHtml(p.time)}</span>
       <span class="prestation-name">${escHtml(p.libelle)}</span>
+      ${exportedBadge}
       <span class="prestation-amount">CHF ${p.montant.toFixed(2)}</span>
       <button class="del-btn" onclick="removePrestation(${p.id})" aria-label="Supprimer">✕</button>
     </div>`;
@@ -997,6 +1010,7 @@ async function exportCSV() {
   const csv = buildCSV();
   const blob = new Blob([csv], { type: 'text/csv;charset=windows-1252' });
 
+  let shared = false;
   if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename)] })) {
     try {
       await navigator.share({
@@ -1004,20 +1018,35 @@ async function exportCSV() {
         text: 'Fichier d\'import des écritures Winbiz',
         files: [new File([blob], filename, { type: 'text/csv' })]
       });
+      shared = true;
       toast('Fichier partagé');
-      return;
     } catch (e) {
       if (e.name === 'AbortError') return;
     }
   }
 
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('Fichier téléchargé — prêt à importer dans Winbiz');
+  if (!shared) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Fichier téléchargé — prêt à importer dans Winbiz');
+  }
+
+  // Mark all prestations as exported
+  const exportedAt = new Date().toISOString();
+  prestations = prestations.map(p => ({ ...p, exported: true, exportedAt }));
+  saveToStorage();
+  render();
+
+  // Ask to clear the session
+  if (confirm('Vider la session en cours ?')) {
+    prestations = [];
+    saveToStorage();
+    render();
+  }
 }
 
 function clearDay() {
