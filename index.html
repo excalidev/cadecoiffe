@@ -549,74 +549,7 @@
   .sync-dot.ok      { background: var(--success); }
   .sync-dot.error   { background: var(--danger); }
 
-  .settings-btn {
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 0.2rem 0.3rem;
-    -webkit-tap-highlight-color: transparent;
-    line-height: 1;
-    border-radius: var(--radius-sm);
-    transition: background 0.15s;
-  }
-  .settings-btn:active { background: rgba(0,0,0,0.08); }
 
-  .settings-field { display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 0.875rem; }
-  .settings-field label { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
-  .settings-field input {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem;
-    color: var(--text);
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.6rem 0.75rem;
-    outline: none;
-    transition: border-color 0.15s;
-    -webkit-appearance: none;
-    width: 100%;
-  }
-  .settings-field input:focus { border-color: var(--accent); }
-
-  .settings-actions { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem; }
-
-  .settings-save-btn {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 0.75rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: background 0.15s;
-  }
-  .settings-save-btn:active { background: var(--accent-dark); }
-
-  .settings-create-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.7rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.875rem;
-    color: var(--muted);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .settings-create-btn:active { color: var(--accent); border-color: var(--accent); }
-  .settings-create-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .settings-hint {
-    font-size: 0.75rem;
-    color: var(--muted);
-    margin-top: 0.5rem;
-    line-height: 1.5;
-  }
 </style>
 </head>
 <body>
@@ -625,9 +558,8 @@
   <span class="header-title">Ça décoiffe</span>
   <div class="header-right">
     <div class="sync-dot" id="syncDot" role="status" aria-live="polite"
-         aria-label="JSONBin non configuré" title="JSONBin non configuré"></div>
+         aria-label="Synchronisation…" title="Synchronisation…"></div>
     <span class="header-date" id="headerDate"></span>
-    <button class="settings-btn" onclick="openSettings()" aria-label="Paramètres">⚙️</button>
   </div>
 </header>
 
@@ -693,48 +625,18 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Settings bottom sheet -->
-<div class="modal-overlay" id="settingsOverlay" onclick="closeSettings()">
-  <div class="modal-card" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <div class="modal-name" style="margin-bottom:1rem">Synchronisation JSONBin</div>
-    <div class="settings-field">
-      <label for="settingsMasterKey">Master Key (X-Master-Key)</label>
-      <input type="text" id="settingsMasterKey" placeholder="$2b$10$…"
-             autocomplete="off" autocorrect="off" spellcheck="false">
-    </div>
-    <div class="settings-field">
-      <label for="settingsBinId">Bin ID</label>
-      <input type="text" id="settingsBinId" placeholder="Laissez vide pour créer un nouveau bin"
-             autocomplete="off" autocorrect="off" spellcheck="false">
-    </div>
-    <div class="settings-actions">
-      <button class="settings-save-btn" onclick="saveSettings()">Enregistrer</button>
-      <button class="settings-create-btn" id="createBinBtn" onclick="createBin()">Créer un nouveau bin</button>
-    </div>
-    <p class="settings-hint">
-      Créez un compte gratuit sur <strong>jsonbin.io</strong>, copiez votre <em>Master Key</em>,
-      puis cliquez sur « Créer un nouveau bin » pour activer la synchronisation cloud.
-    </p>
-  </div>
-</div>
+
+
 
 <script>
 // ---------------------------------------------------------------------------
 // JSONBin synchronisation
 // ---------------------------------------------------------------------------
-const JSONBIN_KEY_STORE = 'salon_jb_key';
-const JSONBIN_BIN_STORE = 'salon_jb_bin';
-const JSONBIN_BASE      = 'https://api.jsonbin.io/v3/b';
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b';
+const JSONBIN_KEY  = '$2a$10$VVLHiBwFDToXvzYTz42/GusDphp8oicWX71OZnq3EJZfIC//dyjpO';
+const JSONBIN_BIN  = '69f0a929856a6821898119cf';
 
-let jbKey = '';
-let jbBin = '';
 let syncTimer = null;
-
-function loadJBSettings() {
-  jbKey = localStorage.getItem(JSONBIN_KEY_STORE) || '';
-  jbBin = localStorage.getItem(JSONBIN_BIN_STORE) || '';
-}
 
 function setSyncDot(state) { // 'idle' | 'syncing' | 'ok' | 'error'
   const dot = document.getElementById('syncDot');
@@ -748,11 +650,10 @@ function setSyncDot(state) { // 'idle' | 'syncing' | 'ok' | 'error'
 }
 
 async function loadFromJSONBin() {
-  if (!jbKey || !jbBin) return null;
   setSyncDot('syncing');
   try {
-    const res = await fetch(`${JSONBIN_BASE}/${jbBin}/latest`, {
-      headers: { 'X-Master-Key': jbKey }
+    const res = await fetch(`${JSONBIN_BASE}/${JSONBIN_BIN}/latest`, {
+      headers: { 'X-Access-Key': JSONBIN_KEY }
     });
     if (!res.ok) { setSyncDot('error'); return null; }
     const json = await res.json();
@@ -768,16 +669,15 @@ async function loadFromJSONBin() {
 }
 
 async function saveToJSONBin() {
-  if (!jbKey || !jbBin) return;
   setSyncDot('syncing');
   try {
-    const res = await fetch(`${JSONBIN_BASE}/${jbBin}`, {
+    const res = await fetch(`${JSONBIN_BASE}/${JSONBIN_BIN}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': jbKey
+        'X-Access-Key': JSONBIN_KEY
       },
-      body: JSON.stringify(prestations)
+      body: JSON.stringify({ prestations })
     });
     setSyncDot(res.ok ? 'ok' : 'error');
   } catch {
@@ -786,7 +686,6 @@ async function saveToJSONBin() {
 }
 
 function scheduleSyncToJSONBin() {
-  if (!jbKey || !jbBin) return;
   clearTimeout(syncTimer);
   syncTimer = setTimeout(saveToJSONBin, 1500);
 }
@@ -798,62 +697,6 @@ async function syncFromJSONBin() {
     prestations = remote;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(prestations));
     render();
-  }
-}
-
-async function createBin() {
-  const key = document.getElementById('settingsMasterKey').value.trim();
-  if (!key) { toast('Clé API requise'); return; }
-  const btn = document.getElementById('createBinBtn');
-  btn.disabled = true;
-  btn.textContent = 'Création…';
-  try {
-    const res = await fetch(JSONBIN_BASE, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': key,
-        'X-Bin-Name': 'cadecoiffe'
-      },
-      body: JSON.stringify({ prestations: [] })
-    });
-    if (!res.ok) {
-      let errMsg = 'HTTP ' + res.status;
-      try { const e = await res.json(); if (e.message) errMsg = e.message; } catch {}
-      throw new Error(errMsg);
-    }
-    const json = await res.json();
-    document.getElementById('settingsBinId').value = json.metadata.id;
-    toast('Bin créé — cliquez sur Enregistrer');
-  } catch (e) {
-    toast('Erreur : ' + (e.message || 'création du bin impossible'));
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Créer un nouveau bin';
-  }
-}
-
-function openSettings() {
-  document.getElementById('settingsMasterKey').value = jbKey;
-  document.getElementById('settingsBinId').value = jbBin;
-  document.getElementById('settingsOverlay').classList.add('open');
-}
-
-function closeSettings() {
-  document.getElementById('settingsOverlay').classList.remove('open');
-}
-
-function saveSettings() {
-  jbKey = document.getElementById('settingsMasterKey').value.trim();
-  jbBin = document.getElementById('settingsBinId').value.trim();
-  localStorage.setItem(JSONBIN_KEY_STORE, jbKey);
-  localStorage.setItem(JSONBIN_BIN_STORE, jbBin);
-  closeSettings();
-  toast('Paramètres enregistrés');
-  if (jbKey && jbBin) {
-    syncFromJSONBin();
-  } else {
-    setSyncDot('idle');
   }
 }
 
@@ -1248,7 +1091,6 @@ document.getElementById('inputLibelle').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('inputMontant').focus();
 });
 
-loadJBSettings();
 loadFromStorage();
 initHeader();
 initCategories();
