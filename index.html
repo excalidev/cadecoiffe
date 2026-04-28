@@ -757,7 +757,10 @@ async function loadFromJSONBin() {
     if (!res.ok) { setSyncDot('error'); return null; }
     const json = await res.json();
     setSyncDot('ok');
-    return Array.isArray(json.record) ? json.record : null;
+    const r = json.record;
+    if (Array.isArray(r)) return r;
+    if (r && Array.isArray(r.prestations)) return r.prestations;
+    return null;
   } catch {
     setSyncDot('error');
     return null;
@@ -812,14 +815,18 @@ async function createBin() {
         'X-Master-Key': key,
         'X-Bin-Name': 'cadecoiffe'
       },
-      body: JSON.stringify([])
+      body: JSON.stringify({ prestations: [] })
     });
-    if (!res.ok) throw new Error('Échec de la création du bin : HTTP ' + res.status);
+    if (!res.ok) {
+      let errMsg = 'HTTP ' + res.status;
+      try { const e = await res.json(); if (e.message) errMsg = e.message; } catch {}
+      throw new Error(errMsg);
+    }
     const json = await res.json();
     document.getElementById('settingsBinId').value = json.metadata.id;
     toast('Bin créé — cliquez sur Enregistrer');
-  } catch {
-    toast('Erreur lors de la création du bin');
+  } catch (e) {
+    toast('Erreur : ' + (e.message || 'création du bin impossible'));
   } finally {
     btn.disabled = false;
     btn.textContent = 'Créer un nouveau bin';
