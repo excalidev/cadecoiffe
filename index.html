@@ -404,7 +404,13 @@
   .prestation-time {
     font-size: 0.75rem;
     color: var(--muted);
-    min-width: 40px;
+    min-width: 52px;
+    line-height: 1.4;
+  }
+
+  .prestation-date {
+    display: block;
+    font-size: 0.7rem;
   }
 
   .prestation-name {
@@ -586,11 +592,11 @@
   </section>
 
   <section>
-    <div class="section-label">Journée en cours <span class="count-badge" id="countBadge">0</span></div>
+    <div class="section-label">Session en cours <span id="sessionDates"></span><span class="count-badge" id="countBadge">0</span></div>
     <div class="list-card">
       <div id="prestationList"></div>
       <div class="total-row" id="totalRow" style="display:none">
-        <span class="total-label">Total du jour</span>
+        <span class="total-label">Total de la session</span>
         <span class="total-amount" id="totalAmount">CHF 0.00</span>
       </div>
     </div>
@@ -601,7 +607,7 @@
     <button class="export-btn" id="exportBtn" onclick="exportCSV()" disabled>
       Générer le fichier d'import Winbiz
     </button>
-    <button class="clear-btn" onclick="clearDay()">Vider la journée</button>
+    <button class="clear-btn" onclick="clearDay()">Vider la session en cours</button>
   </section>
 
 </div>
@@ -815,7 +821,7 @@ function saveToStorage() {
 function addPrestation(libelle, montant) {
   const now = new Date();
   const hhmm = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-  prestations.push({ id: Date.now(), libelle, montant: parseFloat(montant), time: hhmm });
+  prestations.push({ id: Date.now(), libelle, montant: parseFloat(montant), date: formatDate(now), time: hhmm });
   saveToStorage();
   render();
   toast(`${libelle} — CHF ${parseFloat(montant).toFixed(2)}`);
@@ -925,20 +931,38 @@ function render() {
   badge.textContent = prestations.length;
   exportBtn.disabled = prestations.length === 0;
 
+  // Update session date range label
+  const sessionDates = document.getElementById('sessionDates');
+  if (prestations.length > 0) {
+    const firstDate = prestations[0].date;
+    const lastDate  = prestations[prestations.length - 1].date;
+    if (firstDate && lastDate) {
+      sessionDates.textContent = firstDate === lastDate
+        ? '— ' + firstDate + ' '
+        : '— ' + firstDate + ' › ' + lastDate + ' ';
+    } else {
+      sessionDates.textContent = '';
+    }
+  } else {
+    sessionDates.textContent = '';
+  }
+
   if (prestations.length === 0) {
     list.innerHTML = '<div class="list-empty">Aucune prestation saisie</div>';
     totalRow.style.display = 'none';
     return;
   }
 
-  list.innerHTML = prestations.map(p => `
+  list.innerHTML = prestations.map(p => {
+    const dateSpan = p.date ? '<span class="prestation-date">' + escHtml(p.date) + '</span>' : '';
+    return `
     <div class="prestation-item">
-      <span class="prestation-time">${p.time}</span>
+      <span class="prestation-time">${dateSpan}${escHtml(p.time)}</span>
       <span class="prestation-name">${escHtml(p.libelle)}</span>
       <span class="prestation-amount">CHF ${p.montant.toFixed(2)}</span>
       <button class="del-btn" onclick="removePrestation(${p.id})" aria-label="Supprimer">✕</button>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 
   const total = prestations.reduce((s, p) => s + p.montant, 0);
   document.getElementById('totalAmount').textContent = 'CHF ' + total.toFixed(2);
@@ -946,11 +970,10 @@ function render() {
 }
 
 function buildCSV() {
-  const today = formatDate(new Date());
   const lines = ['Date;N° Pièce;Cpte Débit;Cpte Crédit;Libellé;Montant;Journal'];
   prestations.forEach((p, i) => {
     const row = [
-      today,
+      p.date || formatDate(new Date()),
       (i + 1).toString(),
       COMPTE_DEBIT,
       COMPTE_CREDIT,
@@ -965,14 +988,19 @@ function buildCSV() {
 
 async function exportCSV() {
   if (prestations.length === 0) return;
-  const filename = 'winbiz_' + formatDateFile(new Date()) + '.csv';
+  const firstDate  = parseDDMMYYYY(prestations[0].date);
+  const lastDate   = parseDDMMYYYY(prestations[prestations.length - 1].date);
+  const firstLabel = firstDate ? formatDateFile(firstDate) : formatDateFile(new Date());
+  const lastLabel  = lastDate  ? formatDateFile(lastDate)  : firstLabel;
+  const sessionLabel = firstLabel !== lastLabel ? firstLabel + '_' + lastLabel : firstLabel;
+  const filename = 'winbiz_' + sessionLabel + '.csv';
   const csv = buildCSV();
   const blob = new Blob([csv], { type: 'text/csv;charset=windows-1252' });
 
   if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename)] })) {
     try {
       await navigator.share({
-        title: 'Import Winbiz — ' + formatDate(new Date()),
+        title: 'Import Winbiz — session',
         text: 'Fichier d\'import des écritures Winbiz',
         files: [new File([blob], filename, { type: 'text/csv' })]
       });
@@ -994,7 +1022,7 @@ async function exportCSV() {
 
 function clearDay() {
   if (prestations.length === 0) return;
-  if (!confirm('Vider toutes les prestations de la journée ?')) return;
+  if (!confirm('Vider toutes les prestations de la session en cours ?')) return;
   prestations = [];
   saveToStorage();
   render();
@@ -1004,6 +1032,19 @@ function formatDate(d) {
   return d.getDate().toString().padStart(2,'0') + '.' +
          (d.getMonth()+1).toString().padStart(2,'0') + '.' +
          d.getFullYear();
+}
+
+function parseDDMMYYYY(str) {
+  if (!str) return null;
+  const parts = str.split('.');
+  if (parts.length !== 3) return null;
+  const day   = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  const year  = parseInt(parts[2], 10);
+  if (isNaN(day) || isNaN(month) || isNaN(year) ||
+      day < 1 || day > 31 || month < 1 || month > 12 || year < 2000) return null;
+  const d = new Date(year, month - 1, day);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 function formatDateFile(d) {
