@@ -1010,8 +1010,10 @@ async function exportCSV() {
   const csv = buildCSV();
   const blob = new Blob([csv], { type: 'text/csv;charset=windows-1252' });
 
+  const mobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+
   let shared = false;
-  if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename)] })) {
+  if (mobile && navigator.canShare && navigator.canShare({ files: [new File([blob], filename)] })) {
     try {
       await navigator.share({
         title: 'Import Winbiz — session',
