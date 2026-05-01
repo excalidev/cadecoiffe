@@ -1,0 +1,139 @@
+{
+  "tenant": {
+    "compteCaisse": "1010"
+  },
+  "categories": [
+    {
+      "label": "Enfants & Jeunes",
+      "compteCredit": "3022",
+      "journal": "VE",
+      "services": [
+        { "code": "004", "name": "Coupe tout petit", "price": 10 },
+        { "code": "001", "name": "Coupe enfant", "subtitle": "jusqu'à 16 ans", "price": 20 },
+        { "code": "002", "name": "Coupe jeune étudiant·e", "price": 23 },
+        { "code": "003", "name": "Coupe jeune fille + shampooing + lissage", "price": 35 }
+      ]
+    },
+    {
+      "label": "Hommes",
+      "compteCredit": "3022",
+      "journal": "VE",
+      "services": [
+        { "code": "010", "name": "Coupe homme", "subtitle": "dès 20 ans", "price": 25 },
+        { "code": "011", "name": "Coupe homme + shampooing", "price": 32 },
+        { "code": "012", "name": "Coupe couronne", "price": 20 },
+        { "code": "013", "name": "Coupe tondeuse", "price": 23 },
+        { "code": "014", "name": "Coupe + couleur homme", "price": 46 }
+      ]
+    },
+    {
+      "label": "Dames — Brushing & Coupe",
+      "compteCredit": "3022",
+      "journal": "VE",
+      "services": [
+        {
+          "code": "020/021",
+          "name": "Brushing + shampooing",
+          "variants": [
+            { "name": "AVS", "code": "020", "price": 35 },
+            { "name": "Standard", "code": "021", "price": 36 }
+          ]
+        },
+        { "code": "022", "name": "Mise en plis + shampooing", "price": 34 },
+        {
+          "code": "023/024",
+          "name": "Coupe + brushing / mise en plis",
+          "variants": [
+            { "name": "AVS", "code": "023", "price": 51 },
+            { "name": "Standard", "code": "024", "price": 53 }
+          ]
+        },
+        { "code": "025", "name": "Coupe séchage aux doigts", "price": 50 }
+      ]
+    },
+    {
+      "label": "Dames — Couleur",
+      "compteCredit": "3022",
+      "journal": "VE",
+      "services": [
+        { "code": "026", "name": "Couleur + brushing / mise en plis", "price": 58 },
+        { "code": "027", "name": "Couleur + brushing cheveux longs", "price": 67 },
+        {
+          "code": "028/029",
+          "name": "Couleur + coupe + brushing",
+          "variants": [
+            { "name": "AVS", "code": "028", "price": 84 },
+            { "name": "Standard", "code": "029", "price": 86 }
+          ]
+        },
+        { "code": "030", "name": "Couleur + coupe + séchage rapide", "price": 80 }
+      ]
+    },
+    {
+      "label": "Dames — Mèches",
+      "compteCredit": "3022",
+      "journal": "VE",
+      "services": [
+        { "code": "031", "name": "Mèches bonnet + brushing", "price": 85 },
+        { "code": "032", "name": "Mèches bonnet + coupe + brushing", "price": 110 },
+        { "code": "033", "name": "Mèches papiers petit", "subtitle": "2.50 / pièce", "variable": true },
+        { "code": "034", "name": "Mèches papiers grand", "subtitle": "3.00 / pièce", "variable": true },
+        { "code": "035", "name": "Mèches papiers multicouleurs", "subtitle": "3.50 / pièce", "variable": true }
+      ]
+    },
+    {
+      "label": "Dames — Permanente",
+      "compteCredit": "3022",
+      "journal": "VE",
+      "services": [
+        {
+          "code": "038/039",
+          "name": "Permanente + brushing",
+          "variants": [
+            { "name": "AVS", "code": "038", "price": 80 },
+            { "name": "Standard", "code": "039", "price": 85 }
+          ]
+        },
+        {
+          "code": "036/037",
+          "name": "Permanente + coupe + brushing",
+          "variants": [
+            { "name": "AVS", "code": "036", "price": 100 },
+            { "name": "Standard", "code": "037", "price": 105 }
+          ]
+        },
+        { "code": "040", "name": "Permanente cheveux longs + coupe", "price": 140 },
+        { "code": "041", "name": "Permanente spirale", "price": 140 }
+      ]
+    },
+    {
+      "label": "Dames — Combinaisons prix libre",
+      "compteCredit": "3022",
+      "journal": "VE",
+      "services": [
+        { "code": "042", "name": "Couleur + coupe + mèches", "variable": true },
+        { "code": "043", "name": "Mèches + coupe", "variable": true },
+        { "code": "044", "name": "Couleur + mèches", "variable": true }
+      ]
+    },
+    {
+      "label": "Spécial & Événements",
+      "compteCredit": "3022",
+      "journal": "VE",
+      "services": [
+        { "code": "050", "name": "Massage huiles essentielles", "price": 17 },
+        { "code": "051", "name": "Chignon de soirée", "price": 65 },
+        { "code": "052", "name": "Chignon de mariage", "price": 75 },
+        { "code": "053", "name": "Forfait mariage", "price": 140 }
+      ]
+    },
+    {
+      "label": "Divers",
+      "compteCredit": "3022",
+      "journal": "VE",
+      "services": [
+        { "code": "100", "name": "Ventes prix variable", "variable": true }
+      ]
+    }
+  ]
+}

@@ -50,7 +50,7 @@ export default function SaisiePage() {
         setCategories(cats)
         setEncaissements(encs)
         // Expand all categories by default for quick access
-        setExpanded(new Set(cats.map(c => c.id)))
+        setExpanded(new Set())
       })
       .catch(() => setError('Erreur de chargement'))
       .finally(() => setLoading(false))
