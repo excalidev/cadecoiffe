@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CadeCoiffe.Api/CadeCoiffe.Api.csproj" />
+  </Folder>
+</Solution>
