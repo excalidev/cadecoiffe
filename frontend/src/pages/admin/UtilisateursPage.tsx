@@ -1,6 +1,14 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { api } from '@/api/client'
 import type { Tenant, User } from '@/types'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert } from '@/components/ui/alert'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Plus } from 'lucide-react'
 
 export default function UtilisateursPage() {
   const [tenants, setTenants] = useState<Tenant[]>([])
@@ -32,62 +40,101 @@ export default function UtilisateursPage() {
     await loadUsers(tenantId || undefined)
   }
 
-  if (loading) return <p>Chargement…</p>
+  if (loading) return <p className="text-gray-500 p-6">Chargement…</p>
 
   return (
-    <div className="admin-page">
-      <div className="page-header">
-        <h1>Utilisateurs</h1>
-        <button onClick={() => setShowForm(v => !v)}>
-          {showForm ? 'Fermer' : '+ Nouvel utilisateur'}
-        </button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Utilisateurs</h1>
+        <Button onClick={() => setShowForm(v => !v)}>
+          {showForm ? 'Fermer' : (
+            <>
+              <Plus className="h-4 w-4" />
+              Nouvel utilisateur
+            </>
+          )}
+        </Button>
       </div>
 
-      {error && <p className="error" onClick={() => setError(null)}>{error} ✕</p>}
-      {success && <p className="success" onClick={() => setSuccess(null)}>{success} ✕</p>}
-
-      {showForm && (
-        <div className="inline-form-card">
-          <UserForm
-            tenants={tenants}
-            onDone={(email) => {
-              setShowForm(false)
-              setSuccess(`Utilisateur ${email} créé`)
-              loadUsers(filterTenant || undefined)
-            }}
-            onCancel={() => setShowForm(false)}
-          />
-        </div>
+      {error && (
+        <Alert variant="destructive" className="error cursor-pointer" onClick={() => setError(null)}>
+          {error} ✕
+        </Alert>
+      )}
+      {success && (
+        <Alert variant="success" className="success cursor-pointer" onClick={() => setSuccess(null)}>
+          {success} ✕
+        </Alert>
       )}
 
-      <div className="form-group" style={{ maxWidth: 300 }}>
-        <label>Filtrer par tenant</label>
-        <select value={filterTenant} onChange={e => handleFilter(e.target.value)}>
+      {showForm && (
+        <Card>
+          <CardContent className="pt-6">
+            <UserForm
+              tenants={tenants}
+              onDone={(email) => {
+                setShowForm(false)
+                setSuccess(`Utilisateur ${email} créé`)
+                loadUsers(filterTenant || undefined)
+              }}
+              onCancel={() => setShowForm(false)}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="space-y-1.5 max-w-xs">
+        <Label>Filtrer par tenant</Label>
+        <select
+          className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={filterTenant}
+          onChange={e => handleFilter(e.target.value)}
+        >
           <option value="">Tous les tenants</option>
           {tenants.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
         </select>
       </div>
 
-      {users.length === 0 && <p className="empty">Aucun utilisateur</p>}
-
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Tenant</th>
-            <th>Rôle</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(u => (
-            <tr key={u.id}>
-              <td>{u.email}</td>
-              <td>{tenants.find(t => t.id === u.tenantId)?.name ?? '—'}</td>
-              <td>{u.isSuperAdmin ? '⭐ Super admin' : 'Utilisateur'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {users.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-gray-500">Aucun utilisateur</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader className="pb-0">
+            <CardTitle className="text-base">{users.length} utilisateur(s)</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Tenant</TableHead>
+                  <TableHead>Rôle</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map(u => (
+                  <TableRow key={u.id}>
+                    <TableCell className="font-medium">{u.email}</TableCell>
+                    <TableCell className="text-gray-600">
+                      {tenants.find(t => t.id === u.tenantId)?.name ?? '—'}
+                    </TableCell>
+                    <TableCell>
+                      {u.isSuperAdmin
+                        ? <Badge variant="default">⭐ Super admin</Badge>
+                        : <Badge variant="secondary">Utilisateur</Badge>
+                      }
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
@@ -121,29 +168,33 @@ function UserForm({
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Nouvel utilisateur</h2>
-      <div className="form-row">
-        <div className="form-group">
-          <label>Email</label>
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-lg font-semibold text-gray-900">Nouvel utilisateur</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="space-y-1.5">
+          <Label>Email</Label>
+          <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
         </div>
-        <div className="form-group">
-          <label>Mot de passe initial</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+        <div className="space-y-1.5">
+          <Label>Mot de passe initial</Label>
+          <Input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
         </div>
-        <div className="form-group">
-          <label>Tenant</label>
-          <select value={tenantId} onChange={e => setTenantId(e.target.value)}>
+        <div className="space-y-1.5">
+          <Label>Tenant</Label>
+          <select
+            className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={tenantId}
+            onChange={e => setTenantId(e.target.value)}
+          >
             <option value="">— Aucun (admin) —</option>
             {tenants.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
         </div>
       </div>
-      {error && <p className="error">{error}</p>}
-      <div className="form-actions">
-        <button type="button" onClick={onCancel}>Annuler</button>
-        <button type="submit" disabled={loading}>{loading ? '…' : 'Créer'}</button>
+      {error && <Alert variant="destructive" className="error">{error}</Alert>}
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
+        <Button type="submit" disabled={loading}>{loading ? '…' : 'Créer'}</Button>
       </div>
     </form>
   )

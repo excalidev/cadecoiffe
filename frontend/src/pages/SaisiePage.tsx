@@ -4,6 +4,13 @@ import { api } from '@/api/client'
 import { useAuth } from '@/contexts/AuthContext'
 import { resolveAccounting, buildLibelle, todayFormatted } from '@/utils/accounting'
 import type { Category, Service, Variant, Encaissement, Tenant } from '@/types'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Alert } from '@/components/ui/alert'
+import { ChevronDown, ChevronRight, Trash2, Plus, ChevronUp } from 'lucide-react'
 
 type SaisieModal =
   | { type: 'picker'; service: Service; category: Category }
@@ -129,153 +136,197 @@ export default function SaisiePage() {
     }
   }
 
-  if (loading) return <p>Chargement…</p>
+  if (loading) return <p className="text-gray-500 p-6">Chargement…</p>
 
   return (
-    <div className="saisie-page">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="saisie-header">
+      <div className="flex items-center justify-between">
         <div>
-          <h1>Saisie</h1>
-          <span className="saisie-date">{today}</span>
+          <h1 className="text-2xl font-bold text-gray-900">Saisie</h1>
+          <p className="text-gray-500 text-sm mt-0.5">{today}</p>
         </div>
-        <div className="saisie-total">
-          Total du jour&nbsp;
-          <strong>{total.toFixed(2)} CHF</strong>
-        </div>
+        <Badge variant="default" className="text-base px-4 py-1.5">
+          {total.toFixed(2)} CHF
+        </Badge>
       </div>
 
-      {error && <p className="error" onClick={() => setError(null)}>{error} ✕</p>}
+      {error && (
+        <Alert variant="destructive" className="error cursor-pointer" onClick={() => setError(null)}>
+          {error} ✕
+        </Alert>
+      )}
 
       {/* Catalogue */}
-      <section className="catalogue-section">
+      <section className="space-y-3">
         {categories.length === 0 && (
-          <p className="empty">Catalogue vide — configurez-le dans l'onglet Catalogue</p>
+          <p className="text-gray-500 text-sm">Catalogue vide — configurez-le dans l'onglet Catalogue</p>
         )}
         {categories.map(cat => (
-          <div key={cat.id} className="saisie-category">
-            <button className="category-toggle" onClick={() => toggleExpand(cat.id)}>
-              {expanded.has(cat.id) ? '▼' : '▶'} {cat.label}
+          <Card key={cat.id}>
+            <button
+              className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-gray-50 transition-colors rounded-lg"
+              onClick={() => toggleExpand(cat.id)}
+            >
+              <div className="flex items-center gap-3">
+                <span className="font-semibold text-gray-900">{cat.label}</span>
+                <Badge variant="outline" className="text-xs">{cat.compteCredit}</Badge>
+                <Badge variant="secondary" className="text-xs">{cat.journal}</Badge>
+              </div>
+              {expanded.has(cat.id)
+                ? <ChevronDown className="h-4 w-4 text-gray-400" />
+                : <ChevronRight className="h-4 w-4 text-gray-400" />
+              }
             </button>
             {expanded.has(cat.id) && (
-              <div className="service-buttons">
-                {cat.services.map(svc => (
-                  <button
-                    key={svc.id}
-                    className="service-btn"
-                    onClick={() => handleServiceTap(svc, cat)}
-                  >
-                    <span className="svc-name">{svc.name}</span>
-                    {svc.variants.length === 1 && !svc.variants[0].variable && svc.variants[0].price != null && (
-                      <span className="svc-price">{svc.variants[0].price.toFixed(2)}</span>
-                    )}
-                    {svc.variants.length === 1 && svc.variants[0].variable && (
-                      <span className="svc-price tag-libre">libre</span>
-                    )}
-                    {svc.variants.length > 1 && (
-                      <span className="svc-price tag-variants">{svc.variants.length} var.</span>
-                    )}
-                  </button>
-                ))}
-              </div>
+              <CardContent className="pt-0 pb-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                  {cat.services.map(svc => (
+                    <button
+                      key={svc.id}
+                      className="flex flex-col items-start gap-1.5 p-3.5 bg-gray-50 hover:bg-blue-50 hover:border-blue-300 border border-gray-200 rounded-lg transition-colors text-left group"
+                      onClick={() => handleServiceTap(svc, cat)}
+                    >
+                      <span className="font-medium text-gray-900 text-sm leading-tight group-hover:text-blue-700">
+                        {svc.name}
+                      </span>
+                      {svc.variants.length === 1 && !svc.variants[0].variable && svc.variants[0].price != null && (
+                        <Badge variant="secondary" className="text-xs font-mono">
+                          {svc.variants[0].price.toFixed(2)} CHF
+                        </Badge>
+                      )}
+                      {svc.variants.length === 1 && svc.variants[0].variable && (
+                        <Badge variant="warning" className="text-xs">libre</Badge>
+                      )}
+                      {svc.variants.length > 1 && (
+                        <Badge variant="outline" className="text-xs">{svc.variants.length} var.</Badge>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
             )}
-          </div>
+          </Card>
         ))}
       </section>
 
       {/* Saisie manuelle */}
-      <section className="manual-section">
-        <h2>Saisie manuelle</h2>
-        <form onSubmit={handleManualSubmit} className="manual-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label>Libellé</label>
-              <input
-                value={manLibelle}
-                onChange={e => setManLibelle(e.target.value)}
-                placeholder="Ex : Pourboire"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Montant CHF</label>
-              <input
-                type="number"
-                step="0.05"
-                min="0"
-                value={manMontant}
-                onChange={e => setManMontant(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="btn-link"
-            onClick={() => setShowAdvanced(v => !v)}
-          >
-            {showAdvanced ? '▼' : '▶'} Comptabilité
-          </button>
-
-          {showAdvanced && (
-            <div className="form-row">
-              <div className="form-group">
-                <label>Compte crédit</label>
-                <input
-                  value={manCompteCredit}
-                  onChange={e => setManCompteCredit(e.target.value)}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Saisie manuelle</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleManualSubmit} className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Libellé</Label>
+                <Input
+                  value={manLibelle}
+                  onChange={e => setManLibelle(e.target.value)}
+                  placeholder="Ex : Pourboire"
                   required
                 />
               </div>
-              <div className="form-group">
-                <label>Journal</label>
-                <input
-                  value={manJournal}
-                  onChange={e => setManJournal(e.target.value)}
+              <div className="space-y-1.5">
+                <Label>Montant CHF</Label>
+                <Input
+                  type="number"
+                  step="0.05"
+                  min="0"
+                  value={manMontant}
+                  onChange={e => setManMontant(e.target.value)}
                   required
                 />
               </div>
             </div>
-          )}
 
-          <button type="submit">Ajouter</button>
-        </form>
-      </section>
+            <button
+              type="button"
+              className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+              onClick={() => setShowAdvanced(v => !v)}
+            >
+              {showAdvanced ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+              Comptabilité
+            </button>
+
+            {showAdvanced && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-5 border-l-2 border-gray-200">
+                <div className="space-y-1.5">
+                  <Label>Compte crédit</Label>
+                  <Input
+                    value={manCompteCredit}
+                    onChange={e => setManCompteCredit(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Journal</Label>
+                  <Input
+                    value={manJournal}
+                    onChange={e => setManJournal(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            <Button type="submit" size="sm">
+              <Plus className="h-4 w-4" />
+              Ajouter
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Liste du jour */}
-      <section className="encaissements-section">
-        <h2>Encaissements du jour</h2>
-        {encaissements.length === 0 && <p className="empty">Aucun encaissement</p>}
-        <ul className="encaissement-list">
-          {encaissements.map(enc => (
-            <li key={enc.id} className="encaissement-row">
-              <span className="enc-libelle">{enc.libelle}</span>
-              <span className="enc-montant">{enc.montant.toFixed(2)} CHF</span>
-              {!enc.exported && (
-                <button
-                  className="btn-delete"
-                  onClick={() => deleteEncaissement(enc.id)}
-                  title="Supprimer"
-                >
-                  ✕
-                </button>
-              )}
-              {enc.exported && <span className="tag-exported">exporté</span>}
-            </li>
-          ))}
-        </ul>
-        {encaissements.length > 0 && (
-          <div className="encaissement-total">
-            Total <strong>{total.toFixed(2)} CHF</strong>
-          </div>
-        )}
-      </section>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Encaissements du jour</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {encaissements.length === 0 && (
+            <p className="text-gray-500 text-sm py-4 text-center">Aucun encaissement</p>
+          )}
+          <ul className="divide-y divide-gray-100">
+            {encaissements.map(enc => (
+              <li key={enc.id} className="flex items-center justify-between py-2.5 gap-3">
+                <span className="text-gray-800 text-sm flex-1">{enc.libelle}</span>
+                <span className="font-semibold text-gray-900 font-mono text-sm whitespace-nowrap">
+                  {enc.montant.toFixed(2)} CHF
+                </span>
+                {!enc.exported && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-gray-400 hover:text-red-500"
+                    onClick={() => deleteEncaissement(enc.id)}
+                    title="Supprimer"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+                {enc.exported && (
+                  <Badge variant="success" className="text-xs">exporté</Badge>
+                )}
+              </li>
+            ))}
+          </ul>
+          {encaissements.length > 0 && (
+            <div className="flex justify-between items-center pt-3 mt-2 border-t border-gray-200">
+              <span className="text-sm text-gray-500">Total</span>
+              <span className="font-bold text-gray-900 font-mono">{total.toFixed(2)} CHF</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Modales */}
       {modal && (
-        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setModal(null) }}>
-          <div className="modal-content">
+        <div
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={e => { if (e.target === e.currentTarget) setModal(null) }}
+        >
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
             {modal.type === 'picker' && (
               <VariantPickerModal
                 service={modal.service}
@@ -312,21 +363,27 @@ function VariantPickerModal({
   onClose: () => void
 }) {
   return (
-    <div className="variant-picker">
-      <h2>{service.name}</h2>
-      <p className="subtitle">{service.subtitle}</p>
-      <div className="variant-buttons">
+    <div className="p-6 space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">{service.name}</h2>
+        {service.subtitle && <p className="text-sm text-gray-500 mt-0.5">{service.subtitle}</p>}
+      </div>
+      <div className="space-y-2">
         {service.variants.map(v => (
-          <button key={v.id} className="variant-btn" onClick={() => onPick(v, service, category)}>
-            <span>{v.name || service.name}</span>
+          <button
+            key={v.id}
+            className="w-full flex items-center justify-between p-3.5 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors text-left"
+            onClick={() => onPick(v, service, category)}
+          >
+            <span className="font-medium text-gray-900">{v.name || service.name}</span>
             {v.variable
-              ? <span className="tag-libre">prix libre</span>
-              : <span>{v.price?.toFixed(2)} CHF</span>
+              ? <Badge variant="warning">prix libre</Badge>
+              : <Badge variant="secondary" className="font-mono">{v.price?.toFixed(2)} CHF</Badge>
             }
           </button>
         ))}
       </div>
-      <button className="btn-cancel" onClick={onClose}>Annuler</button>
+      <Button variant="outline" className="w-full" onClick={onClose}>Annuler</Button>
     </div>
   )
 }
@@ -354,11 +411,11 @@ function AmountModal({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="amount-modal">
-      <h2>{libelle}</h2>
-      <div className="form-group">
-        <label>Montant CHF</label>
-        <input
+    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-gray-900">{libelle}</h2>
+      <div className="space-y-1.5">
+        <Label>Montant CHF</Label>
+        <Input
           type="number"
           step="0.05"
           min="0.05"
@@ -368,11 +425,10 @@ function AmountModal({
           required
         />
       </div>
-      <div className="form-actions">
-        <button type="button" onClick={onClose}>Annuler</button>
-        <button type="submit">Ajouter</button>
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Annuler</Button>
+        <Button type="submit" className="flex-1">Ajouter</Button>
       </div>
     </form>
   )
 }
-

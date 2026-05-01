@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react'
 import { api } from '@/api/client'
 import { triggerDownload } from '@/utils/download'
 import type { Export } from '@/types'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert } from '@/components/ui/alert'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Download } from 'lucide-react'
 
 export default function HistoriquePage() {
   const [exports, setExports] = useState<Export[]>([])
@@ -23,31 +28,66 @@ export default function HistoriquePage() {
     }
   }
 
-  if (loading) return <p>Chargement…</p>
+  if (loading) return <p className="text-gray-500 p-6">Chargement…</p>
 
   return (
-    <div className="historique-page">
-      <h1>Historique des exports</h1>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900">Historique des exports</h1>
 
-      {error && <p className="error" onClick={() => setError(null)}>{error} ✕</p>}
-      {exports.length === 0 && <p className="empty">Aucun export pour le moment.</p>}
+      {error && (
+        <Alert variant="destructive" className="error cursor-pointer" onClick={() => setError(null)}>
+          {error} ✕
+        </Alert>
+      )}
 
-      <ul className="export-list">
-        {exports.map(exp => (
-          <li key={exp.id} className="export-row">
-            <div className="export-info">
-              <span className="export-filename">{exp.filename}</span>
-              <span className="export-meta">
-                {new Date(exp.createdAt).toLocaleString('fr-CH')}
-                {' · '}{exp.encaissementCount} ligne(s)
-                {' · '}{exp.total.toFixed(2)} CHF
-              </span>
-            </div>
-            <button onClick={() => handleDownload(exp)}>⬇ Re-télécharger</button>
-          </li>
-        ))}
-      </ul>
+      {exports.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-gray-500">Aucun export pour le moment.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader className="pb-0">
+            <CardTitle className="text-base">{exports.length} export(s)</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Fichier</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Lignes</TableHead>
+                  <TableHead className="text-right">Total CHF</TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {exports.map(exp => (
+                  <TableRow key={exp.id}>
+                    <TableCell className="font-mono text-xs">{exp.filename}</TableCell>
+                    <TableCell className="text-gray-600 text-sm">
+                      {new Date(exp.createdAt).toLocaleString('fr-CH')}
+                    </TableCell>
+                    <TableCell className="text-right text-gray-600">{exp.encaissementCount}</TableCell>
+                    <TableCell className="text-right font-mono font-semibold">{exp.total.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDownload(exp)}
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        Re-télécharger
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
-

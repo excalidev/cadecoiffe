@@ -1,6 +1,14 @@
 import { useState, useEffect, type FormEvent } from 'react'
+import type { ReactNode } from 'react'
 import { api } from '@/api/client'
 import type { Category, Service, Variant } from '@/types'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Alert } from '@/components/ui/alert'
+import { ChevronDown, ChevronRight, Plus, Pencil, Trash2 } from 'lucide-react'
 
 type ModalState =
   | { type: 'cat-new' }
@@ -55,80 +63,126 @@ export default function CataloguePage() {
     load()
   }
 
-  if (loading) return <p>Chargement…</p>
+  if (loading) return <p className="text-gray-500 p-6">Chargement…</p>
 
   return (
-    <div className="catalogue-page">
-      <div className="page-header">
-        <h1>Catalogue</h1>
-        <button onClick={() => setModal({ type: 'cat-new' })}>+ Catégorie</button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Catalogue</h1>
+        <Button onClick={() => setModal({ type: 'cat-new' })}>
+          <Plus className="h-4 w-4" />
+          Catégorie
+        </Button>
       </div>
-      {error && <p className="error">{error}</p>}
+
+      {error && <Alert variant="destructive" className="error">{error}</Alert>}
 
       {categories.length === 0 && (
-        <p className="empty">Aucune catégorie — cliquez « + Catégorie » pour commencer</p>
+        <p className="text-gray-500 text-sm">Aucune catégorie — cliquez « + Catégorie » pour commencer</p>
       )}
 
-      {categories.map(cat => (
-        <div key={cat.id} className="category-block">
-          <div className="category-header">
-            <button className="expand-btn" onClick={() => toggleExpand(cat.id)}>
-              {expanded.has(cat.id) ? '▼' : '▶'}
-            </button>
-            <span className="category-label">{cat.label}</span>
-            <span className="category-meta">{cat.compteCredit} · {cat.journal}</span>
-            <div className="actions">
-              <button onClick={() => setModal({ type: 'svc-new', catId: cat.id })}>+ Service</button>
-              <button onClick={() => setModal({ type: 'cat-edit', cat })}>Modifier</button>
-              <button className="btn-danger" onClick={() => deleteCategory(cat.id)}>Supprimer</button>
+      <div className="space-y-3">
+        {categories.map(cat => (
+          <Card key={cat.id}>
+            <div className="flex items-center justify-between px-5 py-3.5">
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                  onClick={() => toggleExpand(cat.id)}
+                >
+                  {expanded.has(cat.id)
+                    ? <ChevronDown className="h-4 w-4 text-gray-400 shrink-0" />
+                    : <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
+                  }
+                  <span className="font-semibold text-gray-900">{cat.label}</span>
+                </button>
+                <Badge variant="outline" className="text-xs shrink-0">{cat.compteCredit}</Badge>
+                <Badge variant="secondary" className="text-xs shrink-0">{cat.journal}</Badge>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0 ml-3">
+                <Button size="sm" variant="outline" onClick={() => setModal({ type: 'svc-new', catId: cat.id })}>
+                  <Plus className="h-3.5 w-3.5" />
+                  Service
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setModal({ type: 'cat-edit', cat })}>
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => deleteCategory(cat.id)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
-          </div>
 
-          {expanded.has(cat.id) && (
-            <div className="services-list">
-              {cat.services.length === 0 && (
-                <p className="empty">Aucun service</p>
-              )}
-              {cat.services.map(svc => (
-                <div key={svc.id} className="service-row">
-                  <div className="service-header">
-                    <span className="service-code">{svc.code}</span>
-                    <span className="service-name">{svc.name}</span>
-                    {svc.subtitle && <span className="service-subtitle">{svc.subtitle}</span>}
-                    <div className="actions">
-                      <button onClick={() => setModal({ type: 'var-new', svcId: svc.id })}>+ Variante</button>
-                      <button onClick={() => setModal({ type: 'svc-edit', svc, catId: cat.id })}>Modifier</button>
-                      <button className="btn-danger" onClick={() => deleteService(svc.id)}>Supprimer</button>
-                    </div>
-                  </div>
-                  {svc.variants.length > 0 && (
-                    <div className="variants-list">
-                      {svc.variants.map(v => (
-                        <div key={v.id} className="variant-row">
-                          <span className="variant-name">{v.name}</span>
-                          {v.variable
-                            ? <span className="variant-price tag-libre">prix libre</span>
-                            : <span className="variant-price">{v.price?.toFixed(2)} CHF</span>
-                          }
-                          {v.code && <span className="variant-code">({v.code})</span>}
-                          <div className="actions">
-                            <button onClick={() => setModal({ type: 'var-edit', variant: v, svcId: svc.id })}>Modifier</button>
-                            <button className="btn-danger" onClick={() => deleteVariant(v.id)}>Supprimer</button>
-                          </div>
+            {expanded.has(cat.id) && (
+              <CardContent className="pt-0 pb-3 px-5">
+                {cat.services.length === 0 && (
+                  <p className="text-gray-400 text-sm py-2">Aucun service</p>
+                )}
+                <div className="space-y-2">
+                  {cat.services.map(svc => (
+                    <div key={svc.id} className="border border-gray-100 rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between px-4 py-2.5">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Badge variant="outline" className="text-xs font-mono shrink-0">{svc.code}</Badge>
+                          <span className="font-medium text-gray-900 text-sm">{svc.name}</span>
+                          {svc.subtitle && (
+                            <span className="text-gray-500 text-xs hidden sm:block">{svc.subtitle}</span>
+                          )}
                         </div>
-                      ))}
+                        <div className="flex items-center gap-1 shrink-0 ml-2">
+                          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setModal({ type: 'var-new', svcId: svc.id })}>
+                            <Plus className="h-3 w-3" />
+                            Variante
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setModal({ type: 'svc-edit', svc, catId: cat.id })}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => deleteService(svc.id)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                      {svc.variants.length > 0 && (
+                        <div className="border-t border-gray-100 divide-y divide-gray-100">
+                          {svc.variants.map(v => (
+                            <div key={v.id} className="flex items-center justify-between px-4 py-2 pl-8 bg-white rounded-b-lg">
+                              <div className="flex items-center gap-2.5">
+                                <span className="text-gray-700 text-sm">{v.name}</span>
+                                {v.variable
+                                  ? <Badge variant="warning" className="text-xs">prix libre</Badge>
+                                  : <Badge variant="secondary" className="text-xs font-mono">{v.price?.toFixed(2)} CHF</Badge>
+                                }
+                                {v.code && (
+                                  <span className="text-gray-400 text-xs font-mono">({v.code})</span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setModal({ type: 'var-edit', variant: v, svcId: svc.id })}>
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => deleteVariant(v.id)}>
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+              </CardContent>
+            )}
+          </Card>
+        ))}
+      </div>
 
       {modal && (
-        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setModal(null) }}>
-          <div className="modal-content">
+        <div
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={e => { if (e.target === e.currentTarget) setModal(null) }}
+        >
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <ModalContent
               modal={modal}
               onClose={() => setModal(null)}
@@ -158,6 +212,18 @@ function ModalContent({
     case 'var-new': return <VariantForm svcId={modal.svcId} onClose={onClose} onDone={onDone} />
     case 'var-edit': return <VariantForm variant={modal.variant} svcId={modal.svcId} onClose={onClose} onDone={onDone} />
   }
+}
+
+function FormField({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label>
+        {label}
+        {hint && <span className="text-gray-400 font-normal text-xs ml-1">({hint})</span>}
+      </Label>
+      {children}
+    </div>
+  )
 }
 
 function CategoryForm({
@@ -192,28 +258,24 @@ function CategoryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>{cat ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h2>
-      <div className="form-group">
-        <label>Libellé</label>
-        <input value={label} onChange={e => setLabel(e.target.value)} required />
-      </div>
-      <div className="form-group">
-        <label>Compte crédit</label>
-        <input value={compteCredit} onChange={e => setCompteCredit(e.target.value)} required />
-      </div>
-      <div className="form-group">
-        <label>Journal</label>
-        <input value={journal} onChange={e => setJournal(e.target.value)} required />
-      </div>
-      <div className="form-group">
-        <label>Ordre</label>
-        <input type="number" value={order} onChange={e => setOrder(+e.target.value)} />
-      </div>
-      {error && <p className="error">{error}</p>}
-      <div className="form-actions">
-        <button type="button" onClick={onClose}>Annuler</button>
-        <button type="submit" disabled={loading}>{loading ? '…' : 'Enregistrer'}</button>
+    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-gray-900">{cat ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h2>
+      <FormField label="Libellé">
+        <Input value={label} onChange={e => setLabel(e.target.value)} required />
+      </FormField>
+      <FormField label="Compte crédit">
+        <Input value={compteCredit} onChange={e => setCompteCredit(e.target.value)} required />
+      </FormField>
+      <FormField label="Journal">
+        <Input value={journal} onChange={e => setJournal(e.target.value)} required />
+      </FormField>
+      <FormField label="Ordre">
+        <Input type="number" value={order} onChange={e => setOrder(+e.target.value)} />
+      </FormField>
+      {error && <Alert variant="destructive" className="error">{error}</Alert>}
+      <div className="flex gap-2 pt-1">
+        <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Annuler</Button>
+        <Button type="submit" className="flex-1" disabled={loading}>{loading ? '…' : 'Enregistrer'}</Button>
       </div>
     </form>
   )
@@ -263,36 +325,30 @@ function ServiceForm({
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>{svc ? 'Modifier le service' : 'Nouveau service'}</h2>
-      <div className="form-group">
-        <label>Code</label>
-        <input value={code} onChange={e => setCode(e.target.value)} required />
-      </div>
-      <div className="form-group">
-        <label>Nom</label>
-        <input value={name} onChange={e => setName(e.target.value)} required />
-      </div>
-      <div className="form-group">
-        <label>Sous-titre <span className="optional">(optionnel)</span></label>
-        <input value={subtitle} onChange={e => setSubtitle(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label>Compte crédit <span className="optional">(hérite de la catégorie)</span></label>
-        <input value={compteCredit} onChange={e => setCompteCredit(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label>Journal <span className="optional">(hérite de la catégorie)</span></label>
-        <input value={journal} onChange={e => setJournal(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label>Ordre</label>
-        <input type="number" value={order} onChange={e => setOrder(+e.target.value)} />
-      </div>
-      {error && <p className="error">{error}</p>}
-      <div className="form-actions">
-        <button type="button" onClick={onClose}>Annuler</button>
-        <button type="submit" disabled={loading}>{loading ? '…' : 'Enregistrer'}</button>
+    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-gray-900">{svc ? 'Modifier le service' : 'Nouveau service'}</h2>
+      <FormField label="Code">
+        <Input value={code} onChange={e => setCode(e.target.value)} required />
+      </FormField>
+      <FormField label="Nom">
+        <Input value={name} onChange={e => setName(e.target.value)} required />
+      </FormField>
+      <FormField label="Sous-titre" hint="optionnel">
+        <Input value={subtitle} onChange={e => setSubtitle(e.target.value)} />
+      </FormField>
+      <FormField label="Compte crédit" hint="hérite de la catégorie">
+        <Input value={compteCredit} onChange={e => setCompteCredit(e.target.value)} />
+      </FormField>
+      <FormField label="Journal" hint="hérite de la catégorie">
+        <Input value={journal} onChange={e => setJournal(e.target.value)} />
+      </FormField>
+      <FormField label="Ordre">
+        <Input type="number" value={order} onChange={e => setOrder(+e.target.value)} />
+      </FormField>
+      {error && <Alert variant="destructive" className="error">{error}</Alert>}
+      <div className="flex gap-2 pt-1">
+        <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Annuler</Button>
+        <Button type="submit" className="flex-1" disabled={loading}>{loading ? '…' : 'Enregistrer'}</Button>
       </div>
     </form>
   )
@@ -344,52 +400,49 @@ function VariantForm({
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>{variant ? 'Modifier la variante' : 'Nouvelle variante'}</h2>
-      <div className="form-group">
-        <label>Nom</label>
-        <input value={name} onChange={e => setName(e.target.value)} required />
-      </div>
-      <div className="form-group checkbox-group">
-        <label>
-          <input type="checkbox" checked={variable} onChange={e => setVariable(e.target.checked)} />
-          Prix libre (saisie manuelle du montant)
-        </label>
+    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-gray-900">{variant ? 'Modifier la variante' : 'Nouvelle variante'}</h2>
+      <FormField label="Nom">
+        <Input value={name} onChange={e => setName(e.target.value)} required />
+      </FormField>
+      <div className="flex items-center gap-2.5 py-1">
+        <input
+          type="checkbox"
+          id="variable-check"
+          checked={variable}
+          onChange={e => setVariable(e.target.checked)}
+          className="h-4 w-4 rounded border-gray-300 text-blue-600"
+        />
+        <Label htmlFor="variable-check" className="cursor-pointer">Prix libre (saisie manuelle du montant)</Label>
       </div>
       {!variable && (
-        <div className="form-group">
-          <label>Prix (CHF)</label>
-          <input
+        <FormField label="Prix (CHF)">
+          <Input
             type="number"
             step="0.05"
             min="0"
             value={price}
             onChange={e => setPrice(e.target.value)}
           />
-        </div>
+        </FormField>
       )}
-      <div className="form-group">
-        <label>Code <span className="optional">(optionnel)</span></label>
-        <input value={code} onChange={e => setCode(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label>Compte crédit <span className="optional">(hérite du service/catégorie)</span></label>
-        <input value={compteCredit} onChange={e => setCompteCredit(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label>Journal <span className="optional">(hérite du service/catégorie)</span></label>
-        <input value={journal} onChange={e => setJournal(e.target.value)} />
-      </div>
-      <div className="form-group">
-        <label>Ordre</label>
-        <input type="number" value={order} onChange={e => setOrder(+e.target.value)} />
-      </div>
-      {error && <p className="error">{error}</p>}
-      <div className="form-actions">
-        <button type="button" onClick={onClose}>Annuler</button>
-        <button type="submit" disabled={loading}>{loading ? '…' : 'Enregistrer'}</button>
+      <FormField label="Code" hint="optionnel">
+        <Input value={code} onChange={e => setCode(e.target.value)} />
+      </FormField>
+      <FormField label="Compte crédit" hint="hérite du service/catégorie">
+        <Input value={compteCredit} onChange={e => setCompteCredit(e.target.value)} />
+      </FormField>
+      <FormField label="Journal" hint="hérite du service/catégorie">
+        <Input value={journal} onChange={e => setJournal(e.target.value)} />
+      </FormField>
+      <FormField label="Ordre">
+        <Input type="number" value={order} onChange={e => setOrder(+e.target.value)} />
+      </FormField>
+      {error && <Alert variant="destructive" className="error">{error}</Alert>}
+      <div className="flex gap-2 pt-1">
+        <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Annuler</Button>
+        <Button type="submit" className="flex-1" disabled={loading}>{loading ? '…' : 'Enregistrer'}</Button>
       </div>
     </form>
   )
 }
-
