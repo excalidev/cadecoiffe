@@ -1,0 +1,22 @@
+# .agents (Copilot skills - not part of the project source)
+.agents/
+
+# Session state
+.copilot/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Backend
+backend/src/*/bin/
+backend/src/*/obj/
+
+# Environment
+.env
+*.env.local
+
+# OS
+.DS_Store
+Thumbs.db
