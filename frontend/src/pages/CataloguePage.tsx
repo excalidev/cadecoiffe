@@ -84,55 +84,67 @@ export default function CataloguePage() {
       <div className="space-y-3">
         {categories.map(cat => (
           <Card key={cat.id}>
-            <div className="flex items-center justify-between px-5 py-3.5">
-              <div className="flex items-center gap-3 min-w-0">
-                <button
-                  className="flex items-center gap-2 hover:text-blue-600 transition-colors"
-                  onClick={() => toggleExpand(cat.id)}
+            {/* Category header */}
+            <div className="flex items-center px-4 py-3 gap-2">
+              {/* Expand tap target */}
+              <button
+                className="flex items-center gap-2 flex-1 min-w-0 text-left hover:text-blue-600 transition-colors py-0.5"
+                onClick={() => toggleExpand(cat.id)}
+              >
+                {expanded.has(cat.id)
+                  ? <ChevronDown className="h-4 w-4 text-gray-400 shrink-0" />
+                  : <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
+                }
+                <span className="font-semibold text-gray-900 truncate">{cat.label}</span>
+                <span className="text-xs text-gray-400 shrink-0 hidden sm:block">{cat.compteCredit} · {cat.journal}</span>
+              </button>
+              {/* Actions */}
+              <div className="flex items-center gap-1 shrink-0">
+                <Button
+                  size="sm" variant="outline"
+                  className="h-8 px-2 sm:px-3"
+                  onClick={() => setModal({ type: 'svc-new', catId: cat.id })}
+                  title="Ajouter un service"
                 >
-                  {expanded.has(cat.id)
-                    ? <ChevronDown className="h-4 w-4 text-gray-400 shrink-0" />
-                    : <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
-                  }
-                  <span className="font-semibold text-gray-900">{cat.label}</span>
-                </button>
-                <Badge variant="outline" className="text-xs shrink-0">{cat.compteCredit}</Badge>
-                <Badge variant="secondary" className="text-xs shrink-0">{cat.journal}</Badge>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0 ml-3">
-                <Button size="sm" variant="outline" onClick={() => setModal({ type: 'svc-new', catId: cat.id })}>
                   <Plus className="h-3.5 w-3.5" />
-                  Service
+                  <span className="hidden sm:inline ml-1">Service</span>
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setModal({ type: 'cat-edit', cat })}>
+                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setModal({ type: 'cat-edit', cat })}>
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
-                <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => deleteCategory(cat.id)}>
+                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => deleteCategory(cat.id)}>
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
 
             {expanded.has(cat.id) && (
-              <CardContent className="pt-0 pb-3 px-5">
+              <CardContent className="pt-0 pb-3 px-3 sm:px-5">
                 {cat.services.length === 0 && (
-                  <p className="text-gray-400 text-sm py-2">Aucun service</p>
+                  <p className="text-gray-400 text-sm py-2 pl-1">Aucun service</p>
                 )}
                 <div className="space-y-2">
                   {cat.services.map(svc => (
-                    <div key={svc.id} className="border border-gray-100 rounded-lg bg-gray-50">
-                      <div className="flex items-center justify-between px-4 py-2.5">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <Badge variant="outline" className="text-xs font-mono shrink-0">{svc.code}</Badge>
-                          <span className="font-medium text-gray-900 text-sm">{svc.name}</span>
-                          {svc.subtitle && (
-                            <span className="text-gray-500 text-xs hidden sm:block">{svc.subtitle}</span>
-                          )}
+                    <div key={svc.id} className="border border-gray-100 rounded-lg bg-gray-50 overflow-hidden">
+                      {/* Service row */}
+                      <div className="flex items-center gap-2 px-3 py-2.5">
+                        <div className="flex items-start gap-2 flex-1 min-w-0">
+                          <Badge variant="outline" className="text-xs font-mono shrink-0 mt-0.5">{svc.code}</Badge>
+                          <div className="min-w-0">
+                            <p className="font-medium text-gray-900 text-sm leading-tight">{svc.name}</p>
+                            {svc.subtitle && (
+                              <p className="text-gray-500 text-xs mt-0.5 leading-tight">{svc.subtitle}</p>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1 shrink-0 ml-2">
-                          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setModal({ type: 'var-new', svcId: svc.id })}>
-                            <Plus className="h-3 w-3" />
-                            Variante
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            size="sm" variant="ghost"
+                            className="h-7 w-7 p-0 text-blue-600 hover:bg-blue-50"
+                            onClick={() => setModal({ type: 'var-new', svcId: svc.id })}
+                            title="Ajouter une variante"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
                           </Button>
                           <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setModal({ type: 'svc-edit', svc, catId: cat.id })}>
                             <Pencil className="h-3.5 w-3.5" />
@@ -142,21 +154,22 @@ export default function CataloguePage() {
                           </Button>
                         </div>
                       </div>
+                      {/* Variants */}
                       {svc.variants.length > 0 && (
                         <div className="border-t border-gray-100 divide-y divide-gray-100">
                           {svc.variants.map(v => (
-                            <div key={v.id} className="flex items-center justify-between px-4 py-2 pl-8 bg-white rounded-b-lg">
-                              <div className="flex items-center gap-2.5">
-                                <span className="text-gray-700 text-sm">{v.name}</span>
+                            <div key={v.id} className="flex items-center gap-2 px-3 py-2 pl-5 bg-white">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <span className="text-gray-700 text-sm truncate">{v.name}</span>
                                 {v.variable
-                                  ? <Badge variant="warning" className="text-xs">prix libre</Badge>
-                                  : <Badge variant="secondary" className="text-xs font-mono">{v.price?.toFixed(2)} CHF</Badge>
+                                  ? <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">libre</span>
+                                  : <span className="text-xs font-mono font-semibold text-gray-700 shrink-0">{v.price?.toFixed(2)} CHF</span>
                                 }
                                 {v.code && (
-                                  <span className="text-gray-400 text-xs font-mono">({v.code})</span>
+                                  <span className="text-gray-400 text-xs font-mono shrink-0 hidden sm:inline">({v.code})</span>
                                 )}
                               </div>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1 shrink-0">
                                 <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setModal({ type: 'var-edit', variant: v, svcId: svc.id })}>
                                   <Pencil className="h-3.5 w-3.5" />
                                 </Button>
@@ -179,10 +192,13 @@ export default function CataloguePage() {
 
       {modal && (
         <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
           onClick={e => { if (e.target === e.currentTarget) setModal(null) }}
         >
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-center pt-3 pb-1 sm:hidden">
+              <div className="w-10 h-1 bg-gray-300 rounded-full" />
+            </div>
             <ModalContent
               modal={modal}
               onClose={() => setModal(null)}
@@ -273,9 +289,9 @@ function CategoryForm({
         <Input type="number" value={order} onChange={e => setOrder(+e.target.value)} />
       </FormField>
       {error && <Alert variant="destructive" className="error">{error}</Alert>}
-      <div className="flex gap-2 pt-1">
-        <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Annuler</Button>
-        <Button type="submit" className="flex-1" disabled={loading}>{loading ? '…' : 'Enregistrer'}</Button>
+      <div className="flex gap-2 pt-1 pb-1">
+        <Button type="button" variant="outline" className="flex-1 h-11" onClick={onClose}>Annuler</Button>
+        <Button type="submit" className="flex-1 h-11" disabled={loading}>{loading ? '…' : 'Enregistrer'}</Button>
       </div>
     </form>
   )
@@ -346,9 +362,9 @@ function ServiceForm({
         <Input type="number" value={order} onChange={e => setOrder(+e.target.value)} />
       </FormField>
       {error && <Alert variant="destructive" className="error">{error}</Alert>}
-      <div className="flex gap-2 pt-1">
-        <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Annuler</Button>
-        <Button type="submit" className="flex-1" disabled={loading}>{loading ? '…' : 'Enregistrer'}</Button>
+      <div className="flex gap-2 pt-1 pb-1">
+        <Button type="button" variant="outline" className="flex-1 h-11" onClick={onClose}>Annuler</Button>
+        <Button type="submit" className="flex-1 h-11" disabled={loading}>{loading ? '…' : 'Enregistrer'}</Button>
       </div>
     </form>
   )
@@ -439,9 +455,9 @@ function VariantForm({
         <Input type="number" value={order} onChange={e => setOrder(+e.target.value)} />
       </FormField>
       {error && <Alert variant="destructive" className="error">{error}</Alert>}
-      <div className="flex gap-2 pt-1">
-        <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Annuler</Button>
-        <Button type="submit" className="flex-1" disabled={loading}>{loading ? '…' : 'Enregistrer'}</Button>
+      <div className="flex gap-2 pt-1 pb-1">
+        <Button type="button" variant="outline" className="flex-1 h-11" onClick={onClose}>Annuler</Button>
+        <Button type="submit" className="flex-1 h-11" disabled={loading}>{loading ? '…' : 'Enregistrer'}</Button>
       </div>
     </form>
   )
