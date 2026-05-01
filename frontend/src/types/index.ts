@@ -8,6 +8,7 @@ export interface Variant {
   code?: string
   compteCredit?: string
   journal?: string
+  order: number
 }
 
 export interface Service {
@@ -17,6 +18,7 @@ export interface Service {
   subtitle?: string
   compteCredit?: string
   journal?: string
+  order: number
   variants: Variant[]
 }
 

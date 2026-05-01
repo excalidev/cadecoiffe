@@ -93,5 +93,51 @@ public static class CatalogueEndpoints
             await db.SaveChangesAsync();
             return Results.NoContent();
         });
+        group.MapPost("/services/{serviceId:guid}/variants", async (Guid serviceId, HttpContext ctx, AppDbContext db, Variant variant) =>
+        {
+            var tenantId = ctx.GetTenantId();
+            var service = await db.Services.FirstOrDefaultAsync(s => s.Id == serviceId);
+            if (service is null) return Results.NotFound();
+            var category = await db.Categories.FirstOrDefaultAsync(c => c.Id == service.CategoryId && c.TenantId == tenantId);
+            if (category is null) return Results.Forbid();
+            variant.ServiceId = serviceId;
+            db.Variants.Add(variant);
+            await db.SaveChangesAsync();
+            return Results.Created($"/api/catalogue/variants/{variant.Id}", variant);
+        });
+
+        group.MapPut("/variants/{id:guid}", async (Guid id, HttpContext ctx, AppDbContext db, Variant updated) =>
+        {
+            var tenantId = ctx.GetTenantId();
+            var variant = await db.Variants.FirstOrDefaultAsync(v => v.Id == id);
+            if (variant is null) return Results.NotFound();
+            var service = await db.Services.FirstOrDefaultAsync(s => s.Id == variant.ServiceId);
+            if (service is null) return Results.NotFound();
+            var category = await db.Categories.FirstOrDefaultAsync(c => c.Id == service.CategoryId && c.TenantId == tenantId);
+            if (category is null) return Results.Forbid();
+            variant.Name = updated.Name;
+            variant.Price = updated.Price;
+            variant.Variable = updated.Variable;
+            variant.Code = updated.Code;
+            variant.CompteCredit = updated.CompteCredit;
+            variant.Journal = updated.Journal;
+            variant.Order = updated.Order;
+            await db.SaveChangesAsync();
+            return Results.Ok(variant);
+        });
+
+        group.MapDelete("/variants/{id:guid}", async (Guid id, HttpContext ctx, AppDbContext db) =>
+        {
+            var tenantId = ctx.GetTenantId();
+            var variant = await db.Variants.FirstOrDefaultAsync(v => v.Id == id);
+            if (variant is null) return Results.NotFound();
+            var service = await db.Services.FirstOrDefaultAsync(s => s.Id == variant.ServiceId);
+            if (service is null) return Results.NotFound();
+            var category = await db.Categories.FirstOrDefaultAsync(c => c.Id == service.CategoryId && c.TenantId == tenantId);
+            if (category is null) return Results.Forbid();
+            db.Variants.Remove(variant);
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        });
     }
 }
