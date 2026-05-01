@@ -170,8 +170,8 @@ export default function SaisiePage() {
             >
               <div className="flex items-center gap-3">
                 <span className="font-semibold text-gray-900">{cat.label}</span>
-                <Badge variant="outline" className="text-xs">{cat.compteCredit}</Badge>
-                <Badge variant="secondary" className="text-xs">{cat.journal}</Badge>
+                <Badge variant="outline" className="text-xs hidden sm:inline-flex">{cat.compteCredit}</Badge>
+                <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{cat.journal}</Badge>
               </div>
               {expanded.has(cat.id)
                 ? <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -180,16 +180,19 @@ export default function SaisiePage() {
             </button>
             {expanded.has(cat.id) && (
               <CardContent className="pt-0 pb-4">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                   {cat.services.map(svc => (
                     <button
                       key={svc.id}
-                      className="flex flex-col items-start gap-1.5 p-3.5 bg-gray-50 hover:bg-blue-50 hover:border-blue-300 border border-gray-200 rounded-lg transition-colors text-left group"
+                      className="flex flex-col items-start gap-1.5 p-3 sm:p-3.5 bg-gray-50 active:bg-blue-100 hover:bg-blue-50 hover:border-blue-300 border border-gray-200 rounded-xl transition-colors text-left group touch-manipulation"
                       onClick={() => handleServiceTap(svc, cat)}
                     >
                       <span className="font-medium text-gray-900 text-sm leading-tight group-hover:text-blue-700">
                         {svc.name}
                       </span>
+                      {svc.subtitle && (
+                        <span className="text-xs text-gray-400 leading-tight hidden sm:block">{svc.subtitle}</span>
+                      )}
                       {svc.variants.length === 1 && !svc.variants[0].variable && svc.variants[0].price != null && (
                         <Badge variant="secondary" className="text-xs font-mono">
                           {svc.variants[0].price.toFixed(2)} CHF
@@ -199,7 +202,7 @@ export default function SaisiePage() {
                         <Badge variant="warning" className="text-xs">libre</Badge>
                       )}
                       {svc.variants.length > 1 && (
-                        <Badge variant="outline" className="text-xs">{svc.variants.length} var.</Badge>
+                        <span className="text-xs text-gray-400">{svc.variants.length} options</span>
                       )}
                     </button>
                   ))}
@@ -323,10 +326,14 @@ export default function SaisiePage() {
       {/* Modales */}
       {modal && (
         <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
           onClick={e => { if (e.target === e.currentTarget) setModal(null) }}
         >
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+          <div className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-xl shadow-xl overflow-hidden">
+            {/* Drag handle on mobile */}
+            <div className="flex justify-center pt-3 pb-1 sm:hidden">
+              <div className="w-10 h-1 bg-gray-300 rounded-full" />
+            </div>
             {modal.type === 'picker' && (
               <VariantPickerModal
                 service={modal.service}
@@ -363,27 +370,27 @@ function VariantPickerModal({
   onClose: () => void
 }) {
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-5 space-y-4 max-h-[75vh] flex flex-col">
       <div>
         <h2 className="text-lg font-semibold text-gray-900">{service.name}</h2>
         {service.subtitle && <p className="text-sm text-gray-500 mt-0.5">{service.subtitle}</p>}
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2.5 overflow-y-auto flex-1">
         {service.variants.map(v => (
           <button
             key={v.id}
-            className="w-full flex items-center justify-between p-3.5 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors text-left"
+            className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-xl active:bg-blue-100 hover:bg-blue-50 hover:border-blue-300 transition-colors text-left touch-manipulation"
             onClick={() => onPick(v, service, category)}
           >
-            <span className="font-medium text-gray-900">{v.name || service.name}</span>
+            <span className="font-medium text-gray-900 text-base">{v.name || service.name}</span>
             {v.variable
-              ? <Badge variant="warning">prix libre</Badge>
-              : <Badge variant="secondary" className="font-mono">{v.price?.toFixed(2)} CHF</Badge>
+              ? <span className="text-sm text-amber-600 font-medium bg-amber-50 px-3 py-1 rounded-full">prix libre</span>
+              : <span className="text-base font-bold text-gray-900 font-mono">{v.price?.toFixed(2)} CHF</span>
             }
           </button>
         ))}
       </div>
-      <Button variant="outline" className="w-full" onClick={onClose}>Annuler</Button>
+      <Button variant="outline" className="w-full h-12 text-base" onClick={onClose}>Annuler</Button>
     </div>
   )
 }
@@ -411,23 +418,29 @@ function AmountModal({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">{libelle}</h2>
+    <form onSubmit={handleSubmit} className="p-5 space-y-5">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">{libelle}</h2>
+        <p className="text-sm text-gray-500 mt-0.5">Saisir le montant</p>
+      </div>
       <div className="space-y-1.5">
         <Label>Montant CHF</Label>
         <Input
           type="number"
           step="0.05"
           min="0.05"
+          inputMode="decimal"
           value={montant}
           onChange={e => setMontant(e.target.value)}
           autoFocus
           required
+          className="h-14 text-2xl text-center font-mono"
+          placeholder="0.00"
         />
       </div>
-      <div className="flex gap-2">
-        <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Annuler</Button>
-        <Button type="submit" className="flex-1">Ajouter</Button>
+      <div className="flex gap-2 pb-1">
+        <Button type="button" variant="outline" className="flex-1 h-12" onClick={onClose}>Annuler</Button>
+        <Button type="submit" className="flex-1 h-12 text-base">Ajouter</Button>
       </div>
     </form>
   )
