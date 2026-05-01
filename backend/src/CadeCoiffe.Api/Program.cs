@@ -72,5 +72,6 @@ app.MapCatalogueEndpoints();
 app.MapEncaissementEndpoints();
 app.MapExportEndpoints();
 app.MapAdminEndpoints();
+app.MapTenantEndpoints();
 
 app.Run();
