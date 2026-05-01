@@ -37,6 +37,16 @@ public static class AdminEndpoints
             return Results.Ok(tenant);
         });
 
+        group.MapDelete("/tenants/{id:guid}", async (Guid id, HttpContext ctx, AppDbContext db) =>
+        {
+            ctx.RequireSuperAdmin();
+            var tenant = await db.Tenants.FindAsync(id);
+            if (tenant is null) return Results.NotFound();
+            db.Tenants.Remove(tenant);
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        });
+
         // Utilisateurs
         group.MapGet("/users", async (HttpContext ctx, AppDbContext db, Guid? tenantId) =>
         {
